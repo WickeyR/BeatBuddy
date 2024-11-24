@@ -96,7 +96,7 @@ app.get('/api/lastfm/tracks', async (req, res) => {
 // Dashboard route (protected)
 app.post('/dashboard', (req, res) => {
     // Resets playlist data when the user logs in
-    initializeDataFiles();
+    // initializeDataFiles();
     res.sendFile(path.join(__dirname, '..', 'public', 'chatApplication.html'));
   });
 
