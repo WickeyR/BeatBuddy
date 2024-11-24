@@ -2,14 +2,20 @@
 
 
 //Import libraries 
-const express = require ('express'); // Handles routing 
-const path = require('path'); // Used to tell program where to find files 
-const app = express();
+require('dotenv').config(); // Load environment variables
+const express = require('express'); // Express for routing
+const path = require('path'); // For working with file paths
+const app = express(); // Initialize the Express application
 
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+
+app.get('/api/env', (req, res) => {
+    res.json({ LAST_FM_API_KEY: process.env.LAST_FM_API_KEY });
+  });
+  
 // Default route to serve the login page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/login.html'));
