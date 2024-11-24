@@ -90,11 +90,19 @@ app.get('/api/lastfm/tracks', async (req, res) => {
       res.status(500).json({ error: 'Failed to fetch data from Last.fm' });
     }
   });
-// ----------------------------------------------------------- //
 
-// Other routes remain the same...
 
-// Start the server
+  
+// Dashboard route (protected)
+app.post('/dashboard', (req, res) => {
+    // Resets playlist data when the user logs in
+    initializeDataFiles();
+    res.sendFile(path.join(__dirname, '..', 'public', 'chatApplication.html'));
+  });
+
+
+
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}`);
