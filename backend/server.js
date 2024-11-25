@@ -17,7 +17,7 @@ app.use(session({
   resave: false, // Avoid resaving session if it hasn't changed
   saveUninitialized: false, // Don't save uninitialized sessions
 }));
-
+console.log("HELLO");
 
 // Load environment variables
 require('dotenv').config();
@@ -106,10 +106,11 @@ app.get('/api/lastfm/tracks', async (req, res) => {
 
 //Database information and password 
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.MYSQL_HOST,
+  user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE,
+  port: process.env.MYSQL_PORT,
 });
 
 //Attempt connection to database 
