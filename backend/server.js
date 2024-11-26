@@ -10,7 +10,21 @@ const app = express();
 const mysql = require('mysql2');
 const saltRounds = 10;
 const session = require('express-session');
-
+const {functionDefinitions, sanitizeMessages } = require('./openAIFunctions.js');
+const {
+  getTrackInfo,
+  getRelatedTracks,
+  searchTrack,
+  getAlbumInfo,
+  searchAlbum,
+  getTagsTopTracks,
+  getTagsTopArtists,
+  addToPlaylist,
+  deleteFromPlaylist,
+  getChartTopArtists,
+  getChartTopTags,
+  getChartTopTracks,
+} = require('./MusicFunctions');
 
 app.use(session({
   secret:'temp', // Secret for signing the session ID cookie
@@ -154,38 +168,207 @@ app.post('/api/messageGPT', async (req, res) => {
       // Add the user's input to the conversation history
       conversationHistory.push({ role: 'user', content: userInput });
 
+      // Define the system prompt and add it to the message chain
+      const systemPrompt = `
+  You are Beat Buddy, a music recommender. Guide the user and make playlists based on their inputs and suggestions.`;
+
+      const aiMessages = [
+        { role: 'system', content: systemPrompt },
+        ...conversationHistory,
+      ];
+
+      // Sanitize messages before sending to OpenAI
+      const sanitizedMessages = sanitizeMessages(aiMessages);
+
       try {
         // Call OpenAI API
         const completion = await openai.chat.completions.create({
-          model: 'gpt-4o-mini', // Use the appropriate model
-          messages: [
-            { role: 'system', content: 'You are Beat Buddy, a music buddy that helps users discover music and build playlists.' },
-            ...conversationHistory,
-          ],
-          max_tokens: 175,
+          model: 'gpt-4o-mini',
+          messages: sanitizedMessages,
+          functions: functionDefinitions,
+          function_call: 'auto',
+          max_tokens: 250,
           temperature: 0.7,
         });
 
-        const aiResponse = completion.choices[0].message.content;
+        const responseMessage = completion.choices[0].message;
 
-        // Save user's message and AI's response in the database
-        const insertMessagesQuery = `
-          INSERT INTO messages (conversation_id, sender, message_content) 
-          VALUES (?, ?, ?), (?, ?, ?)
-        `;
-        db.query(
-          insertMessagesQuery,
-          [conversationId, 'user', userInput, conversationId, 'bot', aiResponse],
-          (err) => {
-            if (err) {
-              console.error('Error saving messages:', err);
-              return res.status(500).json({ success: false, error: 'Error saving messages.' });
-            }
+        // Check if the assistant wants to call a function
+        if (responseMessage.function_call) {
+          const functionName = responseMessage.function_call.name;
+          const functionArgs = JSON.parse(responseMessage.function_call.arguments);
 
-            // Return AI's response to the client
-            res.json({ success: true, response: aiResponse });
+          // Execute the corresponding function
+          let functionResult;
+          switch (functionName) {
+            case 'searchTrack':
+              functionResult = await searchTrack(
+                functionArgs.songTitle,
+                functionArgs.limit || 5,
+                process.env.LAST_FM_API_KEY
+              );
+              break;
+            case 'getTrackInfo':
+              functionResult = await getTrackInfo(
+                functionArgs.artist,
+                functionArgs.songTitle,
+                process.env.LAST_FM_API_KEY
+              );
+              break;
+            case 'getAlbumInfo':
+              functionResult = await getAlbumInfo(
+                functionArgs.artist,
+                functionArgs.albumTitle,
+                process.env.LAST_FM_API_KEY
+              );
+              break;
+            case 'getRelatedTracks':
+              functionResult = await getRelatedTracks(
+                functionArgs.artist,
+                functionArgs.songTitle,
+                functionArgs.limit || 5,
+                process.env.LAST_FM_API_KEY
+              );
+              break;
+            case 'searchAlbum':
+              functionResult = await searchAlbum(
+                functionArgs.albumTitle,
+                functionArgs.limit || 5,
+                process.env.LAST_FM_API_KEY
+              );
+              break;
+            case 'getTagsTopTracks':
+              functionResult = await getTagsTopTracks(
+                functionArgs.tag,
+                functionArgs.limit || 5,
+                process.env.LAST_FM_API_KEY
+              );
+              break;
+            case 'getTagsTopArtists':
+              functionResult = await getTagsTopArtists(
+                functionArgs.tag,
+                functionArgs.limit || 5,
+                process.env.LAST_FM_API_KEY
+              );
+              break;
+            case 'getChartTopArtists':
+              functionResult = await getChartTopArtists(
+                functionArgs.limit || 5,
+                process.env.LAST_FM_API_KEY
+              );
+              break;
+            case 'getChartTopTags':
+              functionResult = await getChartTopTags(
+                functionArgs.limit || 5,
+                process.env.LAST_FM_API_KEY
+              );
+              break;
+            case 'getChartTopTracks':
+              functionResult = await getChartTopTracks(
+                functionArgs.limit || 5,
+                process.env.LAST_FM_API_KEY
+              );
+              break;
+            case 'addToPlaylist':
+              functionResult = await addToPlaylist(
+                functionArgs.songTitle,
+                functionArgs.artist
+              );
+              break;
+            case 'deleteFromPlaylist':
+              functionResult = await deleteFromPlaylist(
+                functionArgs.songTitle,
+                functionArgs.artist
+              );
+              break;
+            case 'printPlaylist':
+              functionResult = await printPlaylist();
+              break;
+            case 'createPlaylist':
+              functionResult = await createPlaylist(
+                functionArgs.playlistTitle,
+                conversationId
+              );
+              break;
+            case 'buildSuggestedGenrePlaylist':
+              functionResult = await buildSuggestedGenrePlaylist(
+                functionArgs.genre || null,
+                functionArgs.limit || 10
+              );
+              break;
+            case 'buildDatabasePlaylist':
+              functionResult = await buildDatabasePlaylist(
+                functionArgs.limit || 10,
+                conversationId
+              );
+              break;
+            case 'buildOnCurrentPlaylist':
+              functionResult = await buildOnCurrentPlaylist(
+                functionArgs.limit || 10
+              );
+              break;
+            default:
+              throw new Error(`Function ${functionName} is not implemented.`);
           }
-        );
+
+          // Add the function's result to the conversation history
+          conversationHistory.push({
+            role: 'function',
+            name: functionName,
+            content: JSON.stringify(functionResult),
+          });
+
+          // Call the OpenAI API again with updated conversation history
+          const completion2 = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: sanitizeMessages(conversationHistory),
+            max_tokens: 250,
+            temperature: 0.7,
+          });
+
+          const finalResponseMessage = completion2.choices[0].message.content;
+
+          // Save AI's response and function results in the database
+          const insertMessagesQuery = `
+            INSERT INTO messages (conversation_id, sender, message_content) 
+            VALUES (?, ?, ?), (?, ?, ?)
+          `;
+          db.query(
+            insertMessagesQuery,
+            [conversationId, 'user', userInput, conversationId, 'bot', finalResponseMessage],
+            (err) => {
+              if (err) {
+                console.error('Error saving messages:', err);
+                return res.status(500).json({ success: false, error: 'Error saving messages.' });
+              }
+
+              // Send the final response to the client
+              res.json({ success: true, response: finalResponseMessage });
+            }
+          );
+        } else {
+          // If no function call, handle as usual
+          const aiResponse = responseMessage.content;
+
+          // Save the user's and AI's messages in the database
+          const insertMessagesQuery = `
+            INSERT INTO messages (conversation_id, sender, message_content) 
+            VALUES (?, ?, ?), (?, ?, ?)
+          `;
+          db.query(
+            insertMessagesQuery,
+            [conversationId, 'user', userInput, conversationId, 'bot', aiResponse],
+            (err) => {
+              if (err) {
+                console.error('Error saving messages:', err);
+                return res.status(500).json({ success: false, error: 'Error saving messages.' });
+              }
+
+              // Send AI's response to the client
+              res.json({ success: true, response: aiResponse });
+            }
+          );
+        }
       } catch (error) {
         console.error('Error with OpenAI API:', error);
         res.status(500).json({ success: false, error: 'Failed to generate response from OpenAI.' });
@@ -196,6 +379,8 @@ app.post('/api/messageGPT', async (req, res) => {
     res.status(500).json({ success: false, error: 'Unexpected server error.' });
   }
 });
+
+
 // Get the playlist for a conversation
 app.get('/conversations/:conversationId/playlist', isAuthenticated, (req, res) => {
   const conversationId = req.params.conversationId;
@@ -448,7 +633,17 @@ app.get('/dashboard', (req, res) => {
   });
 
 
+  //-----------  JSON File Creation and management --------//
+  // Initialize data files
+const saveData = (data, filename) => {
+  const filePath = path.join(__dirname, '..', filename); // Correct the path
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2)); // Writes the contents to the specified file
+};
+const initializeDataFiles = () => {
+  saveData([], 'public/playlist.json');
+};
 
+initializeDataFiles();
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
