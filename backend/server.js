@@ -726,7 +726,7 @@ passport.use(
     {
       clientID: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: SPOTIFY_CALLBACK_URL,
+      callbackURL: process.env.SPOTIFY_CALLBACK_URL,
       passReqToCallback: true,
     },
     function (req, accessToken, refreshToken, expires_in, profile, done) {
@@ -789,7 +789,7 @@ function getSpotifyApiForUser(userId) {
       const spotifyApi = new SpotifyWebApi({
         clientId: process.env.SPOTIFY_CLIENT_ID,
         clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-        redirectUri: 'http://localhost:3000/auth/spotify/callback',
+        redirectUri: process.env.SPOTIFY_CALLBACK_URL,
       });
 
       spotifyApi.setAccessToken(user.spotify_access_token);
