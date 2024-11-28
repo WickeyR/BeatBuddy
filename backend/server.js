@@ -8,9 +8,15 @@ const axios = require('axios');
 const bcrypt = require('bcryptjs');
 const app = express();
 const mysql = require('mysql2');
+const passport = require('passport');
+const SpotifyStrategy = require('passport-spotify').Strategy;
 const saltRounds = 10;
 const session = require('express-session');
 const {functionDefinitions, sanitizeMessages } = require('./openAIFunctions.js');
+
+const SpotifyWebApi = require('spotify-web-api-node');
+
+
 const {
   getTrackInfo,
   getRelatedTracks,
@@ -42,6 +48,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Redirect to login page on root access
 app.get('/', (req, res) => {
@@ -709,8 +717,220 @@ function isAuthenticated(req, res, next) {
     res.redirect('/');
   }
 }
+  //-----------------spotify connection ------------------------
   
-  
+
+// Configure Spotify Strategy
+passport.use(
+  new SpotifyStrategy(
+    {
+      clientID: process.env.SPOTIFY_CLIENT_ID,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+      callbackURL: 'http://localhost:3000/auth/spotify/callback',
+      passReqToCallback: true,
+    },
+    function (req, accessToken, refreshToken, expires_in, profile, done) {
+      const userId = req.session.userId;
+      const expiresAt = new Date(Date.now() + expires_in * 1000);
+
+      const updateQuery = `
+        UPDATE users
+        SET spotify_access_token = ?, spotify_refresh_token = ?, spotify_token_expires = ?
+        WHERE id = ?
+      `;
+      db.query(updateQuery, [accessToken, refreshToken, expiresAt, userId], (err) => {
+        if (err) {
+          console.error('Error updating user with Spotify tokens:', err);
+          return done(err);
+        }
+        return done(null, profile);
+      });
+    }
+  )
+);
+
+// Serialize and deserialize user
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function (obj, done) {
+  done(null, obj);
+});
+
+// Authentication routes
+app.get('/auth/spotify', passport.authenticate('spotify', {
+  scope: ['playlist-modify-public', 'playlist-modify-private'],
+}));
+
+app.get(
+  '/auth/spotify/callback',
+  passport.authenticate('spotify', { failureRedirect: '/login' }),
+  function (req, res) {
+    res.redirect('/dashboard?spotify=success');
+  }
+);
+
+
+
+function getSpotifyApiForUser(userId) {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT spotify_access_token, spotify_refresh_token, spotify_token_expires
+      FROM users
+      WHERE id = ?
+    `;
+    db.query(query, [userId], async (err, results) => {
+      if (err) return reject(err);
+      if (results.length === 0) return reject(new Error('User not found'));
+
+      const user = results[0];
+
+      const spotifyApi = new SpotifyWebApi({
+        clientId: process.env.SPOTIFY_CLIENT_ID,
+        clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+        redirectUri: 'http://localhost:3000/auth/spotify/callback',
+      });
+
+      spotifyApi.setAccessToken(user.spotify_access_token);
+      spotifyApi.setRefreshToken(user.spotify_refresh_token);
+
+      // Check if access token has expired
+      if (new Date() > new Date(user.spotify_token_expires)) {
+        try {
+          const data = await spotifyApi.refreshAccessToken();
+          const newAccessToken = data.body['access_token'];
+          const expiresIn = data.body['expires_in'];
+
+          // Update user's access token and expiration in the database
+          const expiresAt = new Date(Date.now() + expiresIn * 1000);
+
+          const updateQuery = `
+            UPDATE users
+            SET spotify_access_token = ?, spotify_token_expires = ?
+            WHERE id = ?
+          `;
+          db.query(updateQuery, [newAccessToken, expiresAt, userId], (err) => {
+            if (err) return reject(err);
+          });
+
+          spotifyApi.setAccessToken(newAccessToken);
+        } catch (error) {
+          return reject(error);
+        }
+      }
+
+      resolve(spotifyApi);
+    });
+  });
+}
+app.post('/exportPlaylist', isAuthenticated, async (req, res) => {
+  const userId = req.session.userId;
+  const conversationId = req.body.conversationId;
+
+  try {
+    // Get Spotify API client
+    const spotifyApi = await getSpotifyApiForUser(userId);
+
+    // Fetch the user's Spotify ID
+    const meData = await spotifyApi.getMe();
+    const spotifyUserId = meData.body.id;
+
+    // Fetch the playlist from your database
+    const selectPlaylistQuery = 'SELECT * FROM playlist WHERE conversation_id = ?';
+    db.query(selectPlaylistQuery, [conversationId], async (err, playlistResults) => {
+      if (err) {
+        console.error('Error fetching playlist:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+
+      if (playlistResults.length === 0) {
+        return res.status(400).json({ error: 'Playlist is empty' });
+      }
+
+    
+      let playlistName = `BeatBuddy Playlist - ${new Date().toLocaleDateString()}`;
+
+      
+
+      // Create a new playlist in Spotify
+      const createPlaylistData = await spotifyApi.createPlaylist(playlistName, {
+        public: false,
+      });
+
+      const spotifyPlaylistId = createPlaylistData.body.id;
+
+      // Prepare track URIs to add to the playlist
+      const trackUris = [];
+
+      for (const song of playlistResults) {
+        try {
+          // Search for the track on Spotify
+          const searchData = await spotifyApi.searchTracks(
+            `track:${song.song_title} artist:${song.song_artist}`,
+            { limit: 1 }
+          );
+
+          if (searchData.body.tracks.items.length > 0) {
+            const trackUri = searchData.body.tracks.items[0].uri;
+            console.log(song.song_title + "Added to the playlist");
+            trackUris.push(trackUri);
+          } else {
+            console.warn(`Track not found on Spotify: ${song.song_title} by ${song.song_artist}`);
+          }
+        } catch (searchError) {
+          console.error('Error searching for track:', searchError);
+        }
+      }
+
+      if (trackUris.length === 0) {
+        return res.status(400).json({ error: 'No tracks found on Spotify to add to the playlist' });
+      }
+
+      // Add tracks to the playlist
+      await spotifyApi.addTracksToPlaylist(spotifyPlaylistId, trackUris);
+
+      console.log("Playlist successfully exported to spotify")
+      res.json({ success: true, message: 'Playlist exported to Spotify successfully' });
+    });
+  } catch (error) {
+    console.error('Error exporting playlist to Spotify:', error);
+    res.status(500).json({ error: 'Failed to export playlist to Spotify' });
+  }
+});
+
+
+// Check if the user is connected to Spotify
+// Check if the user is connected to Spotify
+app.get('/spotify/status', isAuthenticated, (req, res) => {
+  const userId = req.session.userId;
+
+  const query = `
+    SELECT spotify_access_token, spotify_refresh_token
+    FROM users
+    WHERE id = ?
+  `;
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error checking Spotify connection status:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+
+    if (results.length > 0) {
+      const user = results[0];
+      const isConnected = user.spotify_access_token && user.spotify_refresh_token;
+      res.json({ isConnected: !!isConnected });
+    } else {
+      res.status(404).json({ error: 'User not found' });
+    }
+  });
+});
+
+
+
+
+
+
   // Dashboard route (protected)
 app.get('/dashboard', (req, res) => {
     // Resets playlist data when the user logs in

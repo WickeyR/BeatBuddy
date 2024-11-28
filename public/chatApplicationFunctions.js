@@ -272,3 +272,74 @@ document.getElementById("userinput").addEventListener("keydown", function (event
     document.getElementById('userinput').value = "";
   }
 });
+
+
+//spotify
+document.getElementById('connect-spotify-button').addEventListener('click', function () {
+  window.location.href = '/auth/spotify';
+});
+
+// // Event listener for Export Playlist button
+// document.getElementById('export-playlist-button').addEventListener('click', function () {
+//   exportPlaylist();
+// });
+function checkSpotifyConnection() {
+  fetch('/spotify/status')
+    .then(response => response.json())
+    .then(data => {
+      if (data.isConnected) {
+        // User is connected to Spotify
+        const spotifyButton = document.getElementById('connect-spotify-button');
+        spotifyButton.textContent = 'Export Playlist to Spotify';
+        spotifyButton.id = 'export-playlist-button';
+        // Update the event listener
+        spotifyButton.removeEventListener('click', connectToSpotify);
+        spotifyButton.addEventListener('click', exportPlaylist);
+      } else {
+        // User is not connected to Spotify
+        // Ensure the button says "Connect to Spotify" and has the correct event listener
+        const spotifyButton = document.getElementById('connect-spotify-button');
+        spotifyButton.textContent = 'Connect to Spotify';
+        spotifyButton.id = 'connect-spotify-button';
+        spotifyButton.removeEventListener('click', exportPlaylist);
+        spotifyButton.addEventListener('click', connectToSpotify);
+      }
+    })
+    .catch(error => {
+      console.error('Error checking Spotify connection status:', error);
+    });
+}
+
+// Call the function on page load
+checkSpotifyConnection();
+
+function connectToSpotify() {
+  window.location.href = '/auth/spotify';
+}
+
+function exportPlaylist() {
+  if (!currentConversationId) return;
+
+  fetch('/exportPlaylist', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ conversationId: currentConversationId }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Playlist exported to Spotify successfully!');
+       
+      } else {
+        alert('Failed to export playlist: ' + data.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error exporting playlist:', error);
+    });
+}
+
+// Initial event listener
+document.getElementById('connect-spotify-button').addEventListener('click', connectToSpotify);
