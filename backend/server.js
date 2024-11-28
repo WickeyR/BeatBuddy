@@ -19,7 +19,6 @@ const {
   searchAlbum,
   getTagsTopTracks,
   getTagsTopArtists,
-  addToPlaylist,
   deleteFromPlaylist,
   getChartTopArtists,
   getChartTopTags,
@@ -31,7 +30,6 @@ app.use(session({
   resave: false, // Avoid resaving session if it hasn't changed
   saveUninitialized: false, // Don't save uninitialized sessions
 }));
-console.log("HELLO");
 
 // Load environment variables
 require('dotenv').config();
@@ -269,12 +267,7 @@ app.post('/api/messageGPT', async (req, res) => {
                 process.env.LAST_FM_API_KEY
               );
               break;
-            case 'addToPlaylist':
-              functionResult = await addToPlaylist(
-                functionArgs.songTitle,
-                functionArgs.artist
-              );
-              break;
+          
             case 'deleteFromPlaylist':
               functionResult = await deleteFromPlaylist(
                 functionArgs.songTitle,
@@ -307,6 +300,13 @@ app.post('/api/messageGPT', async (req, res) => {
                 functionArgs.limit || 10
               );
               break;
+              case 'addToPlaylist':
+                  functionResult = await addToPlaylist(
+                    conversationId, // Pass the conversation ID here
+                    functionArgs.songTitle,
+                    functionArgs.artist
+                    );
+                    break;
             default:
               throw new Error(`Function ${functionName} is not implemented.`);
           }
@@ -399,7 +399,7 @@ app.get('/conversations/:conversationId/playlist', isAuthenticated, (req, res) =
     }
 
     // Fetch the playlist for the conversation
-    const selectPlaylistQuery = 'SELECT * FROM conversation_songs WHERE conversation_id = ?';
+    const selectPlaylistQuery = 'SELECT * FROM playlist WHERE conversation_id = ?';
     db.query(selectPlaylistQuery, [conversationId], (err, playlistResults) => {
       if (err) {
         console.error('Error fetching playlist:', err);
@@ -410,6 +410,88 @@ app.get('/conversations/:conversationId/playlist', isAuthenticated, (req, res) =
     });
   });
 });
+
+//----------------- Playlist functions ---------------------------//
+// Delete a song from the playlist
+app.delete('/conversations/:conversationId/playlist/:songId', isAuthenticated, (req, res) => {
+  const conversationId = req.params.conversationId;
+  const songId = req.params.songId;
+  const userId = req.session.userId;
+
+  // Verify that the conversation belongs to the user
+  const verifyQuery = 'SELECT * FROM conversations WHERE conversation_id = ? AND user_id = ?';
+  db.query(verifyQuery, [conversationId, userId], (err, results) => {
+    if (err) {
+      console.error('Error verifying conversation:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    // Delete the song from the playlist
+    const deleteQuery = 'DELETE FROM playlist WHERE id = ? AND conversation_id = ?';
+    db.query(deleteQuery, [songId, conversationId], (err, result) => {
+      if (err) {
+        console.error('Error deleting song from playlist:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+
+      res.json({ success: true, message: 'Song deleted from playlist.' });
+    });
+  });
+});
+
+
+async function addToPlaylist(conversation_id, songTitle, artist) {
+  try {
+    // Fetch track information from Last.fm API
+    const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+      params: {
+        method: 'track.getInfo',
+        api_key: process.env.LAST_FM_API_KEY,
+        artist: artist,
+        track: songTitle,
+        autocorrect: 1,
+        format: 'json',
+      },
+    });
+
+    // Access the track information
+    const trackInfo = response.data.track;
+
+    // Extract the 'extralarge' image URL
+    const imageURL = trackInfo.album?.image.find(
+      (img) => img.size === 'extralarge'
+    )?.['#text'] || '';
+
+    // Prepare values for insertion
+    const values = [
+      conversation_id,
+      trackInfo.name || '',
+      trackInfo.artist?.name || '',
+      trackInfo.album?.title || '',
+      imageURL,
+    ];
+
+    // Insert song into the playlist table
+    const insertQuery = `
+      INSERT INTO playlist (conversation_id, song_title, song_artist, song_album, song_large_image_url)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+
+    await db.promise().query(insertQuery, values);
+    console.log('Song added to playlist:', trackInfo.name);
+
+    return { message: 'Song added to playlist successfully.' };
+  } catch (error) {
+    console.error('Error adding song to playlist:', error);
+    throw error;
+  }
+}
+
+
 
 //--------------------------User Login Functions -----------------//
 
@@ -432,6 +514,9 @@ app.get('/user', (req, res) => {
     }
   });
 });
+
+
+
 
 app.post('/login', (req, res) => {
 
@@ -536,6 +621,7 @@ app.get('/conversations/:conversationId/messages', isAuthenticated, (req, res) =
     }
     res.json(results);
   });
+  
 });
 
 // Send a message in a conversation
@@ -633,17 +719,6 @@ app.get('/dashboard', (req, res) => {
   });
 
 
-  //-----------  JSON File Creation and management --------//
-  // Initialize data files
-const saveData = (data, filename) => {
-  const filePath = path.join(__dirname, '..', filename); // Correct the path
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2)); // Writes the contents to the specified file
-};
-const initializeDataFiles = () => {
-  saveData([], 'public/playlist.json');
-};
-
-initializeDataFiles();
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

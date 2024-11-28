@@ -220,42 +220,7 @@ const functionDefinitions = [
         required: ['apiKey'],
       },
     },
-    {
-        name: 'addToPlaylist',
-        description: 'Adds a particular track to the playlist',
-        parameters: {
-          type: 'object',
-          properties: {
-            songTitle: {
-              type: 'string',
-              description: 'The title of the song.',
-            },
-            artist: {
-              type: 'string',
-              description: 'The name of the artist.',
-            },
-          },
-          required: ['songTitle', 'artist'],
-        },
-      },
-      {
-        name: 'deleteFromPlaylist',
-          description: 'delete a particular track to the playlist',
-          parameters: {
-            type: 'object',
-            properties: {
-              songTitle: {
-                type: 'string',
-                description: 'The title of the song to remove.',
-              },
-              artist: {
-                type: 'string',
-                description: 'The name of the artist to remove.',
-              },
-            },
-            required: ['songTitle', 'artist'],
-          },
-        },
+  
         {
           name: 'printPlaylist',
           description: 'Prints ONLY the song title and the artist of a song',
@@ -263,7 +228,19 @@ const functionDefinitions = [
             type: 'object',
             properties: {},
           },
-        }
+        }, 
+        {
+          name: 'addToPlaylist',
+          description: 'Adds a song to the current conversation’s playlist.',
+          parameters: {
+            type: 'object',
+            properties: {
+              songTitle: { type: 'string', description: 'Title of the song.' },
+              artist: { type: 'string', description: 'Artist of the song.' },
+            },
+            required: ['songTitle', 'artist'],
+          },
+        },
   ];
 
 

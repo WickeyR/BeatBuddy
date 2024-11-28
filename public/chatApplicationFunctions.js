@@ -1,7 +1,7 @@
 // Variables to keep track of current conversation
 let currentConversationId = null;
 
-// Fetch the username and create a new conversation on page load
+// Fetch the username and conversations on page load
 fetch('/user')
   .then(response => {
     if (response.ok) {
@@ -11,34 +11,173 @@ fetch('/user')
     }
   })
   .then(data => {
-    document.getElementById('welcomeMessage').textContent = "Welcome back, " + data.username + "! Start chatting below.";
-    // Create a new conversation after fetching the user
+    // Update the welcome message if you have one
+    // After fetching the user, fetch the conversations
     createNewConversation();
+    fetchChatHistory();
   })
   .catch(error => {
     console.error("An error has occurred fetching username:", error);
   });
 
-// Function to create a new conversation
-function createNewConversation() {
-    fetch('/conversations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: null }),
+function fetchChatHistory() {
+  fetch('/conversations')
+    .then(response => response.json())
+    .then(conversations => {
+      const chatHistoryList = document.getElementById('chat-history-list');
+      chatHistoryList.innerHTML = ''; // Clear existing list
+
+      if (conversations.length > 0) {
+        conversations.forEach(conversation => {
+          const li = document.createElement('li');
+          const button = document.createElement('button');
+          button.className = 'chat-history-item';
+          button.textContent = conversation.title || `Chat from ${new Date(conversation.start_time).toLocaleString()}`;
+          button.dataset.conversationId = conversation.conversation_id;
+          button.addEventListener('click', function () {
+            loadConversation(conversation.conversation_id);
+          });
+          li.appendChild(button);
+          chatHistoryList.appendChild(li);
+        });
+
+        // Load the most recent conversation
+        loadConversation(conversations[0].conversation_id);
+      } else {
+        // If no conversations, create a new one
+        createNewConversation();
+      }
     })
-      .then(response => response.json())
-      .then(conversation => {
-        currentConversationId = conversation.conversation_id;
-        // Clear the chat window
-        const upperDiv = document.getElementById('upperid');
-        upperDiv.innerHTML = '';
-        // Refresh chat history
-        fetchChatHistory();
-      })
-      .catch(error => {
-        console.error('Error creating new conversation:', error);
+    .catch(error => {
+      console.error('Error fetching chat history:', error);
+    });
+}
+
+function fetchPlaylist() {
+  if (!currentConversationId) return;
+
+  fetch(`/conversations/${currentConversationId}/playlist`)
+    .then(response => response.json())
+    .then(playlist => {
+      renderPlaylist(playlist);
+    })
+    .catch(error => {
+      console.error('Error fetching playlist:', error);
+    });
+}
+
+function renderPlaylist(playlist) {
+  const playlistList = document.getElementById('chat-playlist-list');
+  playlistList.innerHTML = ''; // Clear existing items
+
+  playlist.forEach(song => {
+    const li = document.createElement('li');
+    li.className = 'playlist-item';
+
+    // Image element
+    const img = document.createElement('img');
+    img.src = song.song_large_image_url || 'default-image-url.jpg'; // Provide a default image URL if needed
+    img.alt = 'Album Art';
+    img.className = 'song-image';
+
+    // Song details
+    const songDetails = document.createElement('div');
+    songDetails.className = 'song-details';
+
+    const songTitle = document.createElement('div');
+    songTitle.className = 'song-title';
+    songTitle.textContent = song.song_title;
+
+    const songArtist = document.createElement('div');
+    songArtist.className = 'song-artist';
+    songArtist.textContent = song.song_artist;
+
+    songDetails.appendChild(songTitle);
+    songDetails.appendChild(songArtist);
+
+    // Delete button
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'delete-button';
+    deleteButton.textContent = '×';
+    deleteButton.dataset.songId = song.id; // Assuming each song has a unique 'id' field
+    deleteButton.addEventListener('click', function() {
+      deleteSongFromPlaylist(song.id);
+    });
+
+    // Assemble the playlist item
+    li.appendChild(img);
+    li.appendChild(songDetails);
+    li.appendChild(deleteButton);
+
+    playlistList.appendChild(li);
+  });
+}
+
+
+
+
+
+// Function to remove a conversation 
+function deleteConversation(){
+
+}
+
+function createNewConversation() {
+  fetch('/conversations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: null }),
+  })
+    .then(response => response.json())
+    .then(conversation => {
+      currentConversationId = conversation.conversation_id;
+      // Clear the chat window
+      const upperDiv = document.getElementById('upperid');
+      upperDiv.innerHTML = '';
+      // Refresh chat history
+      fetchChatHistory();
+    })
+    .catch(error => {
+      console.error('Error creating new conversation:', error);
+    });
+}
+
+function loadConversation(conversationId) {
+  currentConversationId = conversationId;
+  fetch(`/conversations/${conversationId}/messages`)
+    .then(response => response.json())
+    .then(messages => {
+      // Clear existing messages
+      const upperDiv = document.getElementById('upperid');
+      upperDiv.innerHTML = '';
+
+      // Render messages
+      messages.forEach(message => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message';
+        const messageContentDiv = document.createElement('div');
+        if (message.sender === 'user') {
+          messageContentDiv.className = 'usermessagediv';
+          messageContentDiv.innerHTML = `<div class="usermessage">${message.message_content}</div>`;
+        } else {
+          messageContentDiv.className = 'appmessagediv';
+          messageContentDiv.innerHTML = `<div class="appmessage">${message.message_content}</div>`;
+        }
+        messageDiv.appendChild(messageContentDiv);
+        upperDiv.appendChild(messageDiv);
+
       });
-  }
+
+      // Scroll to bottom
+      scroll();
+    })
+    .catch(error => {
+      console.error('Error loading conversation:', error);
+    });
+    fetchPlaylist();
+
+}
+
 // Function to send a message
 async function sendMessage() {
   const userinput = document.getElementById('userinput').value;
@@ -82,92 +221,54 @@ async function sendMessage() {
   } catch (error) {
     console.error('Error:', error);
   }
+  fetchPlaylist();
 }
 
 
-function fetchChatHistory() {
-  fetch('/conversations')
-    .then(response => response.json())
-    .then(conversations => {
-      const chatHistoryList = document.getElementById('chat-history-list');
-      chatHistoryList.innerHTML = ''; // Clear existing list
-      conversations.forEach(conversation => {
-        const li = document.createElement('li');
-        const button = document.createElement('button');
-        button.className = 'chat-history-item';
-        button.textContent = conversation.title || `Chat from ${new Date(conversation.start_time).toLocaleString()}`;
-        button.dataset.conversationId = conversation.conversation_id;
-        button.addEventListener('click', function () {
-          loadConversation(conversation.conversation_id);
-        });
-        li.appendChild(button);
-        chatHistoryList.appendChild(li);
-      });
+function deleteSongFromPlaylist(songId) {
+  if (!currentConversationId) return;
+
+  fetch(`/conversations/${currentConversationId}/playlist/${songId}`, {
+    method: 'DELETE',
+  })
+    .then(response => {
+      if (response.ok) {
+        // Refresh the playlist
+        fetchPlaylist();
+      } else {
+        console.error('Failed to delete song from playlist');
+      }
     })
     .catch(error => {
-      console.error('Error fetching chat history:', error);
-    });
-}
-
-// Function to load a conversation
-function loadConversation(conversationId) {
-  currentConversationId = conversationId;
-  fetch(`/conversations/${conversationId}/messages`)
-    .then(response => response.json())
-    .then(messages => {
-      // Clear existing messages
-      const upperDiv = document.getElementById('upperid');
-      upperDiv.innerHTML = '';
-
-      // Render messages
-      messages.forEach(message => {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message';
-        const messageContentDiv = document.createElement('div');
-        if (message.sender === 'user') {
-          messageContentDiv.className = 'usermessagediv';
-          messageContentDiv.innerHTML = `<div class="usermessage">${message.message_content}</div>`;
-        } else {
-          messageContentDiv.className = 'appmessagediv';
-          messageContentDiv.innerHTML = `<div class="appmessage">${message.message_content}</div>`;
-        }
-        messageDiv.appendChild(messageContentDiv);
-        upperDiv.appendChild(messageDiv);
-      });
-
-      // Scroll to bottom
-      scroll();
-    })
-    .catch(error => {
-      console.error('Error loading conversation:', error);
+      console.error('Error deleting song from playlist:', error);
     });
 }
 
 
 
-// Functionality for New Chat button
+// Event listener for New Chat button
 document.getElementById('new-chat-button').addEventListener('click', function () {
-    createNewConversation();
-  });
-  
+  createNewConversation();
+});
+
 // Scroll to bottom function
 function scroll() {
-    var div = document.getElementById("upperid");
-    div.scrollTop = div.scrollHeight;
-  }
-  
-  // Event listener for message form submission
-  document.getElementById("userinputform").addEventListener("submit", function (event) {
+  var div = document.getElementById("upperid");
+  div.scrollTop = div.scrollHeight;
+}
+
+// Event listener for message form submission
+document.getElementById("userinputform").addEventListener("submit", function (event) {
+  event.preventDefault();
+  sendMessage();
+  document.getElementById('userinput').value = "";
+});
+
+// Event listener for Enter key in textarea
+document.getElementById("userinput").addEventListener("keydown", function (event) {
+  if (event.key === "Enter") {
     event.preventDefault();
     sendMessage();
     document.getElementById('userinput').value = "";
-  });
-  
-  // Event listener for Enter key in textarea
-  document.getElementById("userinput").addEventListener("keydown", function (event) {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      sendMessage();
-      document.getElementById('userinput').value = "";
-    }
-  });
+  }
+});
