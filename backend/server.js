@@ -32,11 +32,15 @@ const {
 } = require('./MusicFunctions');
 
 app.use(session({
-  secret:'temp', // Secret for signing the session ID cookie
+  secret: process.env.SESSION_SECRET || 'your_default_secret', // Use a strong secret in production
   resave: false, // Avoid resaving session if it hasn't changed
   saveUninitialized: false, // Don't save uninitialized sessions
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
+    maxAge: 1000 * 60 * 60 * 24, // 1 day
+  },
 }));
-
 // Load environment variables
 require('dotenv').config();
 
@@ -604,10 +608,18 @@ app.post('/conversations', isAuthenticated, (req, res) => {
 });
 
 // Get all conversations for the user
+// Get all conversations for the user
 app.get('/conversations', isAuthenticated, (req, res) => {
   const userId = req.session.userId;
 
-  const selectQuery = 'SELECT * FROM conversations WHERE user_id = ? ORDER BY start_time DESC';
+  const selectQuery = `
+    SELECT c.*
+    FROM conversations c
+    WHERE c.user_id = ? AND EXISTS (
+      SELECT 1 FROM messages m WHERE m.conversation_id = c.conversation_id
+    )
+    ORDER BY c.start_time DESC
+  `;
   db.query(selectQuery, [userId], (err, results) => {
     if (err) {
       console.error('Error fetching conversations:', err);
@@ -632,6 +644,89 @@ app.get('/conversations/:conversationId/messages', isAuthenticated, (req, res) =
   
 });
 
+function deleteConversation(conversationId) {
+  if (confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
+    fetch(`/conversations/${conversationId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+      .then(response => {
+        if (response.ok) {
+          // Remove the conversation from the UI
+          fetchChatHistory();
+
+          // If the deleted conversation is the current one, clear the chat window
+          if (conversationId == currentConversationId) {
+            currentConversationId = null;
+            document.getElementById('upperid').innerHTML = '';
+          }
+        } else {
+          console.error('Failed to delete conversation');
+        }
+      })
+      .catch(error => {
+        console.error('Error deleting conversation:', error);
+      });
+  }
+}
+
+
+// Delete a conversation
+app.delete('/conversations/:conversationId', isAuthenticated, (req, res) => {
+  const conversationId = req.params.conversationId;
+  const userId = req.session.userId;
+
+  // Verify that the conversation belongs to the user
+  const verifyQuery = 'SELECT * FROM conversations WHERE conversation_id = ? AND user_id = ?';
+  db.query(verifyQuery, [conversationId, userId], (err, results) => {
+    if (err) {
+      console.error('Error verifying conversation:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    // Delete messages associated with the conversation
+    const deleteMessagesQuery = 'DELETE FROM messages WHERE conversation_id = ?';
+    db.query(deleteMessagesQuery, [conversationId], (err) => {
+      if (err) {
+        console.error('Error deleting messages:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+
+      // Delete the conversation
+      const deleteConversationQuery = 'DELETE FROM conversations WHERE conversation_id = ?';
+      db.query(deleteConversationQuery, [conversationId], (err) => {
+        if (err) {
+          console.error('Error deleting conversation:', err);
+          return res.status(500).json({ error: 'Server error' });
+        }
+
+        res.json({ success: true, message: 'Conversation deleted successfully' });
+      });
+    });
+  });
+});
+
+// Delete empty conversations for the user
+function deleteEmptyConversations(userId) {
+  return new Promise((resolve, reject) => {
+    const deleteQuery = `
+      DELETE c FROM conversations c
+      LEFT JOIN messages m ON c.conversation_id = m.conversation_id
+      WHERE c.user_id = ? AND m.conversation_id IS NULL
+    `;
+    db.query(deleteQuery, [userId], (err, result) => {
+      if (err) {
+        console.error('Error deleting empty conversations:', err);
+        return reject(err);
+      }
+      resolve();
+    });
+  });
+}
 // Send a message in a conversation
 app.post('/conversations/:conversationId/messages', isAuthenticated, async (req, res) => {
   const conversationId = req.params.conversationId;
@@ -767,7 +862,25 @@ app.get(
   '/auth/spotify/callback',
   passport.authenticate('spotify', { failureRedirect: '/login' }),
   function (req, res) {
-    res.redirect('/dashboard?spotify=success');
+    // On success
+    res.send(`
+      <html>
+        <head>
+          <title>Spotify Authentication Success</title>
+        </head>
+        <body>
+          <script>
+            if (window.opener) {
+              window.opener.postMessage('spotify-auth-success', '${req.protocol}://${req.get('host')}');
+              window.close();
+            } else {
+              window.location.href = '/dashboard';
+            }
+          </script>
+          <p>Authentication successful! You can close this window.</p>
+        </body>
+      </html>
+    `);
   }
 );
 
@@ -836,63 +949,59 @@ app.post('/exportPlaylist', isAuthenticated, async (req, res) => {
     const meData = await spotifyApi.getMe();
     const spotifyUserId = meData.body.id;
 
-    // Fetch the playlist from your database
+    // Fetch the playlist from your database using promises
     const selectPlaylistQuery = 'SELECT * FROM playlist WHERE conversation_id = ?';
-    db.query(selectPlaylistQuery, [conversationId], async (err, playlistResults) => {
-      if (err) {
-        console.error('Error fetching playlist:', err);
-        return res.status(500).json({ error: 'Server error' });
-      }
+    const [playlistResults] = await db.promise().query(selectPlaylistQuery, [conversationId]);
 
-      if (playlistResults.length === 0) {
-        return res.status(400).json({ error: 'Playlist is empty' });
-      }
+    if (playlistResults.length === 0) {
+      return res.status(400).json({ error: 'Playlist is empty' });
+    }
 
-    
-      let playlistName = `BeatBuddy Playlist - ${new Date().toLocaleDateString()}`;
+    let playlistName = `BeatBuddy Playlist - ${new Date().toLocaleDateString()}`;
 
-      
-
-      // Create a new playlist in Spotify
-      const createPlaylistData = await spotifyApi.createPlaylist(playlistName, {
-        public: false,
-      });
-
-      const spotifyPlaylistId = createPlaylistData.body.id;
-
-      // Prepare track URIs to add to the playlist
-      const trackUris = [];
-
-      for (const song of playlistResults) {
-        try {
-          // Search for the track on Spotify
-          const searchData = await spotifyApi.searchTracks(
-            `track:${song.song_title} artist:${song.song_artist}`,
-            { limit: 1 }
-          );
-
-          if (searchData.body.tracks.items.length > 0) {
-            const trackUri = searchData.body.tracks.items[0].uri;
-            console.log(song.song_title + "Added to the playlist");
-            trackUris.push(trackUri);
-          } else {
-            console.warn(`Track not found on Spotify: ${song.song_title} by ${song.song_artist}`);
-          }
-        } catch (searchError) {
-          console.error('Error searching for track:', searchError);
-        }
-      }
-
-      if (trackUris.length === 0) {
-        return res.status(400).json({ error: 'No tracks found on Spotify to add to the playlist' });
-      }
-
-      // Add tracks to the playlist
-      await spotifyApi.addTracksToPlaylist(spotifyPlaylistId, trackUris);
-
-      console.log("Playlist successfully exported to spotify")
-      res.json({ success: true, message: 'Playlist exported to Spotify successfully' });
+    // Create a new playlist in Spotify
+    const createPlaylistData = await spotifyApi.createPlaylist(playlistName, {
+      public: false,
     });
+
+    const spotifyPlaylistId = createPlaylistData.body.id;
+
+    // Prepare track URIs to add to the playlist
+    const trackUris = [];
+
+    for (const song of playlistResults) {
+      try {
+        // Search for the track on Spotify
+        const searchData = await spotifyApi.searchTracks(
+          `track:${song.song_title} artist:${song.song_artist}`,
+          { limit: 1 }
+        );
+
+        if (searchData.body.tracks.items.length > 0) {
+          const trackUri = searchData.body.tracks.items[0].uri;
+          console.log(`${song.song_title} added to the playlist`);
+          trackUris.push(trackUri);
+        } else {
+          console.warn(`Track not found on Spotify: ${song.song_title} by ${song.song_artist}`);
+        }
+      } catch (searchError) {
+        console.error('Error searching for track:', searchError);
+      }
+    }
+
+    if (trackUris.length === 0) {
+      return res.status(400).json({ error: 'No tracks found on Spotify to add to the playlist' });
+    }
+
+    // Add tracks to the playlist
+    await spotifyApi.addTracksToPlaylist(spotifyPlaylistId, trackUris);
+
+    console.log('Playlist successfully exported to Spotify');
+
+    // Include the playlist URL in the response
+    const playlistUrl = createPlaylistData.body.external_urls.spotify;
+
+    res.json({ success: true, message: 'Playlist exported to Spotify successfully', playlistUrl });
   } catch (error) {
     console.error('Error exporting playlist to Spotify:', error);
     res.status(500).json({ error: 'Failed to export playlist to Spotify' });
@@ -940,7 +1049,7 @@ app.get('/dashboard', (req, res) => {
 
 
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}`);
 });
