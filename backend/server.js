@@ -44,10 +44,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false,        // Must be true if sameSite is 'none'
+      secure: true,        // Must be true if sameSite is 'none'
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24, // 1 day
-      sameSite: 'lax',    // none for deployment, lax for development
+      sameSite: 'none',    // none for deployment, lax for development
     },
   })
 );
