@@ -44,14 +44,16 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: 'auto', // Automatically set secure flag based on request
-      httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
+      secure: true, // Set to false during development
+      httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24, // 1 day
-      sameSite: 'lax', // Adjust based on your OAuth setup
+      sameSite: 'lax', // Should work for OAuth flows
     },
   })
 );
 
+app.use(passport.initialize());
+app.use(passport.session());
 
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1); // Trust the first proxy
@@ -60,8 +62,7 @@ if (process.env.NODE_ENV === 'production') {
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-app.use(passport.initialize());
-app.use(passport.session());
+
 
 // Redirect to login page on root access
 app.get('/', (req, res) => {
@@ -102,6 +103,11 @@ app.get('/signup', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'signup.html'));
 });
 
+// Serve connectSpotify.html for the connectSpotify page
+app.get('/connectSpotify', isAuthenticated, (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'connectSpotify.html'));
+});
+
 //-------------------------- OpenAI API calls -----------------//
 
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
@@ -130,15 +136,20 @@ app.post('/api/messageGPT', async (req, res) => {
       content: msg.message_content,
     }));
 
+    // **Add the user's input to the conversation history**
+    conversationHistory.push({ role: 'user', content: userInput });
+
     // Fetch the user's genres
     const selectGenresQuery = 'SELECT genre FROM user_genres WHERE user_id = ?';
     const [genresResults] = await db.query(selectGenresQuery, [userId]);
 
-    //To grab user information
+    // To grab user information
     const userGenres = genresResults.map((row) => row.genre);
 
-    // Include the genres in the system prompt
-    const systemPrompt = 'You are Beat Buddy, a music recommender. Guide the user and make playlists based on their inputs and suggestions.';
+    // Define the system prompt and add it to the message chain
+    const systemPrompt = `
+You are Beat Buddy, a music recommender. Guide the user and make playlists based on their inputs and suggestions.`;
+
     const aiMessages = [
       { role: 'system', content: systemPrompt },
       ...conversationHistory,
@@ -153,7 +164,7 @@ app.post('/api/messageGPT', async (req, res) => {
       messages: sanitizedMessages,
       functions: functionDefinitions,
       function_call: 'auto',
-      max_tokens: 175,
+      max_tokens: 250,
       temperature: 0.7,
     });
 
@@ -162,7 +173,7 @@ app.post('/api/messageGPT', async (req, res) => {
     // Check if the assistant wants to call a function
     if (responseMessage.function_call) {
       const functionName = responseMessage.function_call.name;
-      const functionArgs = JSON.parse(responseMessage.function_call.arguments);
+      const functionArgs = JSON.parse(responseMessage.function_call.arguments)
 
       // Execute the corresponding function
       let functionResult;
@@ -277,6 +288,7 @@ app.post('/api/messageGPT', async (req, res) => {
         default:
           throw new Error(`Function ${functionName} is not implemented.`);
       }
+     
       // Add the function's result to the conversation history
       conversationHistory.push({
         role: 'function',
@@ -284,10 +296,16 @@ app.post('/api/messageGPT', async (req, res) => {
         content: JSON.stringify(functionResult),
       });
 
+      // **Reconstruct aiMessages with the updated conversation history**
+      const aiMessagesAfterFunction = [
+        { role: 'system', content: systemPrompt },
+        ...conversationHistory,
+      ];
+
       // Call the OpenAI API again with updated conversation history
       const completion2 = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
-        messages: sanitizeMessages(conversationHistory),
+        messages: sanitizeMessages(aiMessagesAfterFunction),
         max_tokens: 175,
         temperature: 0.7,
       });
@@ -336,6 +354,8 @@ app.post('/api/messageGPT', async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to generate response from OpenAI.' });
   }
 });
+
+
 
 // Get the playlist for a conversation
 app.get('/conversations/:conversationId/playlist', isAuthenticated, async (req, res) => {
@@ -457,11 +477,9 @@ app.get('/user', async (req, res) => {
   }
 });
 
+// Signup route
 app.post('/signup', async (req, res) => {
   const { username, password, genres = [] } = req.body;
-
-  console.log('Session ID at signup:', req.sessionID);
-  console.log('Session at signup:', req.session);
 
   try {
     // Check if username already exists
@@ -480,12 +498,7 @@ app.post('/signup', async (req, res) => {
       INSERT INTO users (username, password)
       VALUES (?, ?)
     `;
- 
-    const [userResult] = await db.query(insertUserQuery, [
-      username,
-      hash,
-      
-    ]);
+    const [userResult] = await db.query(insertUserQuery, [username, hash]);
 
     const userId = userResult.insertId;
 
@@ -499,14 +512,14 @@ app.post('/signup', async (req, res) => {
     // Set req.session.userId
     req.session.userId = userId;
 
- 
-    // Redirect to dashboard or send success response
-    res.redirect('/dashboard');
+    // Redirect to connectSpotify page
+    res.redirect('/connectSpotify');
   } catch (err) {
     console.error('Error during signup:', err);
     res.status(500).send('Server error during signup');
   }
 });
+
 
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
@@ -684,28 +697,37 @@ passport.use(
     {
       clientID: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL:
-        process.env.NODE_ENV === 'production'
-          ? process.env.PRODUCTION_REDIRECT_URI
-          : process.env.LOCAL_REDIRECT_URI,
+      callbackURL: process.env.SPOTIFY_CALLBACK_URL, // Use the correct variable
       passReqToCallback: true,
     },
-    function (req, accessToken, refreshToken, expires_in, profile, done) {
-      const expiresAt = new Date(Date.now() + expires_in * 1000);
+    async function (req, accessToken, refreshToken, expires_in, profile, done) {
+      try {
+        const expiresAt = new Date(Date.now() + expires_in * 1000);
 
-      // Store tokens in session
-      req.session.spotifyTokens = {
-        accessToken,
-        refreshToken,
-        expiresAt,
-      };
-      req.session.spotifyAuthenticated = true;
+        // Store tokens in database
+        const userId = req.session.userId;
+        if (!userId) {
+          return done(new Error('User not authenticated.'));
+        }
 
-      console.log('Spotify tokens stored in session:', req.session.spotifyTokens);
-      done(null, profile);
+        // Update user's Spotify tokens in the database
+        const updateQuery = `
+          UPDATE users
+          SET spotify_access_token = ?, spotify_refresh_token = ?, spotify_token_expires = ?
+          WHERE id = ?
+        `;
+        await db.query(updateQuery, [accessToken, refreshToken, expiresAt, userId]);
+
+        console.log('Spotify tokens stored in database for user:', userId);
+        done(null, profile);
+      } catch (err) {
+        console.error('Error storing Spotify tokens:', err);
+        done(err);
+      }
     }
   )
 );
+
 
 // Serialize and deserialize user
 passport.serializeUser(function (user, done) {
@@ -728,24 +750,7 @@ app.get(
   passport.authenticate('spotify', { failureRedirect: '/signup' }),
   function (req, res) {
     // On success
-    res.send(`
-      <html>
-        <head>
-          <title>Spotify Authentication Success</title>
-        </head>
-        <body>
-          <script>
-            if (window.opener) {
-              window.opener.postMessage('spotify-auth-success', '${req.protocol}://${req.get('host')}');
-              window.close();
-            } else {
-              window.location.href = '/signup';
-            }
-          </script>
-          <p>Authentication successful! You can close this window.</p>
-        </body>
-      </html>
-    `);
+    res.redirect('/dashboard');
   }
 );
 
