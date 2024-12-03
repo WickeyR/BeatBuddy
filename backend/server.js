@@ -35,24 +35,23 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Session configuration
-const isProduction = process.env.NODE_ENV === 'production';
-if (isProduction) {
-  app.set('trust proxy', 1); // Trust first proxy
-}
+const isSecure = process.env.NODE_ENV === 'production' && process.env.SECURE_COOKIE === 'true';
 
+// Session configuration
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: isProduction, // Ensure cookies are only sent over HTTPS in production
+      secure: true, // Set to false during development
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24, // 1 day
-      sameSite: 'none', // Necessary for cross-site requests in OAuth
+      sameSite: 'lax', // Should work for OAuth flows
     },
   })
 );
+
 app.use(passport.initialize());
 app.use(passport.session());
 
