@@ -35,19 +35,23 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Session configuration
+const isSecure = process.env.NODE_ENV === 'production' && process.env.SECURE_COOKIE === 'true';
+
+// Session configuration
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'your_default_secret', // Use a strong secret in production
-    resave: false, // Avoid resaving session if it hasn't changed
-    saveUninitialized: false, // Don't save uninitialized sessions
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production (requires HTTPS)
-      httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
+      secure: process.env.NODE_ENV === 'production', // Secure cookies in production
+      httpOnly: true, // Prevent client-side access
       maxAge: 1000 * 60 * 60 * 24, // 1 day
-      sameSite: 'lax', // Adjusted to allow cookies in popup
+      sameSite: 'lax',
     },
   })
 );
+
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
@@ -673,7 +677,10 @@ passport.use(
     {
       clientID: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: process.env.SPOTIFY_CALLBACK_URL,
+      callbackURL:
+        process.env.NODE_ENV === 'production'
+          ? process.env.PRODUCTION_REDIRECT_URI
+          : process.env.LOCAL_REDIRECT_URI,
       passReqToCallback: true,
     },
     function (req, accessToken, refreshToken, expires_in, profile, done) {
