@@ -44,13 +44,18 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // Secure cookies in production
-      httpOnly: true, // Prevent client-side access
+      secure: 'auto', // Automatically set secure flag based on request
+      httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
       maxAge: 1000 * 60 * 60 * 24, // 1 day
-      sameSite: 'lax',
+      sameSite: 'lax', // Adjust based on your OAuth setup
     },
   })
 );
+
+
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1); // Trust the first proxy
+}
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, '..', 'public')));
