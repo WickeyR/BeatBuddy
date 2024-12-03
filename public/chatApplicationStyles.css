@@ -579,3 +579,74 @@ nav {
         transform: scale(1);
     }
 }
+
+
+@media screen and (max-width: 768px) {
+    /* Hide sidebars by default */
+    .chat-history,
+    .chat-playlist {
+        transform: translateX(-100%); /* Hidden off-screen */
+        position: fixed; /* Fixed for sliding effect */
+        top: 50px; /* Below the navbar */
+        height: calc(100vh - 50px); /* Full height minus navbar */
+        z-index: 999; /* Above other elements */
+        width: 250px; /* Sidebar width */
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .chat-playlist {
+        transform: translateX(100%); /* Hidden to the right */
+        right: 0; /* Align to the right */
+    }
+
+    /* Show sidebars when visible */
+    .chat-history.visible {
+        transform: translateX(0); /* Slide into view */
+    }
+
+    .chat-playlist.visible {
+        transform: translateX(0); /* Slide into view */
+    }
+
+    /* Main chat box adjustments */
+    .box {
+        margin: 0 auto; /* Center when sidebars are hidden */
+        width: 100%; /* Full width */
+        transition: margin-left 0.3s ease-in-out, margin-right 0.3s ease-in-out;
+    }
+
+    .box.sidebar-left-open {
+        margin-left: 250px; /* Adjust when left sidebar is open */
+    }
+
+    .box.sidebar-right-open {
+        margin-right: 250px; /* Adjust when right sidebar is open */
+    }
+
+    /* Toggle buttons */
+    .sidebar-toggle {
+        display: block; /* Ensure buttons are visible */
+        position: fixed;
+        top: 60px; /* Below the navbar */
+        z-index: 1000;
+        background-color: #1DB954;
+        color: #fff;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 1em;
+        cursor: pointer;
+    }
+
+    #toggle-chat-history {
+        left: 10px; /* Position on the left */
+    }
+
+    #toggle-chat-playlist {
+        right: 10px; /* Position on the right */
+    }
+
+    .sidebar-toggle:hover {
+        background-color: #1ed760; /* Brighter green on hover */
+    }
+}

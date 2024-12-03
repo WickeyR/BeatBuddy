@@ -223,3 +223,75 @@ body {
 .SpotifyButton:hover {
     background: #1AA34A;
 } 
+@media screen and (max-width: 768px) {
+    /* General adjustments for mobile */
+    .SignUp {
+        padding: 16px;
+        height: auto; /* Allow content to adjust to the screen size */
+        overflow: hidden;
+    }
+
+    .Content {
+        gap: 32px; /* Reduce spacing between elements */
+    }
+
+    .icon-image {
+        width: 60px; /* Smaller icon size for mobile */
+    }
+
+    .sign-up-header {
+        font-size: 24px; /* Reduce font size for mobile */
+    }
+
+    /* Input fields and buttons */
+    .Input,
+    .SpotifyButton,
+    .Button {
+        width: 100%; /* Full width on smaller screens */
+        height: 48px; /* Slightly smaller height for mobile */
+        font-size: 14px; /* Adjust font size for better readability */
+    }
+
+    .SpotifyButton {
+        font-size: 16px; /* Adjust font size */
+    }
+
+    .Button {
+        height: 56px; /* Match SpotifyButton height */
+        font-size: 16px; /* Adjust font size */
+    }
+
+    .HaveAnAccountLogin {
+        font-size: 14px; /* Reduce font size */
+    }
+
+    .LoginLink {
+        font-size: 14px; /* Match smaller text size */
+    }
+
+    /* GenreSelection */
+    .GenreSelection {
+        width: 100%; /* Full width for mobile */
+    }
+
+    .ScrollableCheckboxes {
+        grid-template-columns: repeat(2, 1fr); /* Fewer columns for smaller screens */
+        gap: 4px; /* Reduce gap between checkboxes */
+        max-height: 120px; /* Adjust height for smaller screen space */
+        padding: 4px; /* Reduce padding */
+    }
+
+    .CustomCheckbox {
+        font-size: 14px; /* Reduce font size for mobile */
+        padding: 6px; /* Adjust padding */
+    }
+
+    .Frame248 {
+        gap: 12px; /* Reduce gap between buttons */
+    }
+
+    /* Error messages */
+    .ErrorMessage {
+        font-size: 12px; /* Smaller font size for error messages */
+    }
+}

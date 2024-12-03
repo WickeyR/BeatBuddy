@@ -133,10 +133,12 @@ app.post('/api/messageGPT', async (req, res) => {
     // Fetch the user's genres
     const selectGenresQuery = 'SELECT genre FROM user_genres WHERE user_id = ?';
     const [genresResults] = await db.query(selectGenresQuery, [userId]);
+
+    //To grab user information
     const userGenres = genresResults.map((row) => row.genre);
 
     // Include the genres in the system prompt
-    const systemPrompt = `You are Beat Buddy, a music recommender. Guide the user and make playlists based on their inputs and suggestions. The user is interested in the following genres: ${userGenres.join(', ')} remember that for later when they are lost on what music to chose.`;
+    const systemPrompt = `You are Beat Buddy, a music recommender. Guide the user and make playlists based on their inputs and suggestions.`;
     const aiMessages = [
       { role: 'system', content: systemPrompt },
       ...conversationHistory,

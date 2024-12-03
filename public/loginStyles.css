@@ -170,3 +170,60 @@ body, html {
     }
   }
   
+/* Media query for smaller devices (iPhone screen sizes) */
+@media screen and (max-width: 390px) {
+    /* Adjust grid for background images */
+    .background-images {
+      grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); /* Full-width columns */
+    }
+    
+    .background-images div {
+      aspect-ratio: 1 / 1; /* Maintain square images */
+    }
+  
+    .background-images img {
+      opacity: 0.2; /* Lower opacity for better focus on the form */
+    }
+  
+    /* Scale up the login overlay */
+    .overlay {
+      width: 90%; /* Increase form width to 90% of the screen */
+      padding: 40px; /* Add more padding for a spacious layout */
+    }
+  
+    .website-title {
+      font-size: 25px; /* Slightly reduce the font size */
+    }
+  
+    .website-tagline {
+      font-size: 14px; /* Adjust tagline size */
+    }
+  
+    .form-title {
+      font-size: 18px; /* Reduce form title size slightly */
+    }
+  
+    .input-container {
+      margin-bottom: 15px; /* Reduce spacing between inputs */
+    }
+  
+    input {
+      padding: 12px; /* Slightly larger padding for better touch support */
+      font-size: 16px; /* Increase font size for readability */
+    }
+  
+    .submit-button {
+      padding: 18px; /* Larger button for easier tapping */
+      font-size: 16px; /* Increase font size */
+    }
+  
+    .login-prompt {
+      font-size: 12px; /* Adjust font size for prompt text */
+    }
+    
+    .icon-image {
+      width: 50px; /* Reduce the size of the icon */
+      margin-bottom: 15px; /* Adjust spacing */
+    }
+  }
+  
