@@ -696,18 +696,23 @@ passport.use(
     {
       clientID: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: process.env.SPOTIFY_CALLBACK_URL, // Use the correct variable
+      callbackURL: process.env.SPOTIFY_CALLBACK_URL,
       passReqToCallback: true,
     },
     async function (req, accessToken, refreshToken, expires_in, profile, done) {
       try {
-        const expiresAt = new Date(Date.now() + expires_in * 1000);
+        // Decode the state parameter to get the userId
+        let userId;
+        if (req.query && req.query.state) {
+          const state = JSON.parse(Buffer.from(req.query.state, 'base64').toString('utf-8'));
+          userId = state.userId;
+        }
 
-        // Store tokens in database
-        const userId = req.session.userId;
         if (!userId) {
           return done(new Error('User not authenticated.'));
         }
+
+        const expiresAt = new Date(Date.now() + expires_in * 1000);
 
         // Update user's Spotify tokens in the database
         const updateQuery = `
@@ -738,12 +743,12 @@ passport.deserializeUser(function (obj, done) {
 });
 
 // Authentication routes
-app.get(
-  '/auth/spotify',
-  passport.authenticate('spotify', {
-    scope: ['playlist-modify-public', 'playlist-modify-private'],
-  })
-);
+app.get('/auth/spotify', (req, res, next) => {
+  if (!req.session.userId) {
+    // User is not authenticated, redirect to login
+    return res.redirect('/login');
+  }
+
 app.get(
   '/auth/spotify/callback',
   passport.authenticate('spotify', { failureRedirect: '/signup' }),
@@ -752,6 +757,16 @@ app.get(
     res.redirect('/dashboard');
   }
 );
+
+
+  // Encode the userId into the state parameter
+  const state = Buffer.from(JSON.stringify({ userId: req.session.userId })).toString('base64');
+
+  passport.authenticate('spotify', {
+    scope: ['playlist-modify-public', 'playlist-modify-private'],
+    state: state,
+  })(req, res, next);
+});
 
 function getSpotifyApiForUser(userId) {
   return new Promise(async (resolve, reject) => {
