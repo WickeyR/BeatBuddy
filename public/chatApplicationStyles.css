@@ -1,9 +1,9 @@
-/* General Styles */
+/* 1. Global Styles */
 * {
-    box-sizing: border-box;
+    box-sizing: border-box; /* Include padding and border in element's total width and height */
 }
 
-/* Wrapper to ensure everything is centered */
+/* 2. Body and Wrapper */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -12,10 +12,11 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vn;
+    height: 100vh; /* Corrected from 100vn to 100vh */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
-/* Container for application */
+/* 3. Container for Application */
 .container {
     display: flex; /* Enables flexbox */
     flex-direction: row; /* Horizontal alignment */
@@ -23,73 +24,18 @@ body {
     align-items: stretch; /* Ensures all containers are the same height */
     height: 100vh; /* Make it take the full height of the viewport */
     gap: 10px; /* Adds spacing between the containers */
-    width: 100%; /* Changed from 100vh to 100% */
-    padding-top: 50px;
+    width: 100%; /* Full width */
+    padding-top: 50px; /* Space for the fixed navbar */
     margin: 0;
 }
 
-/* Main Chat Box */
-.box {
-    display: flex;
-    flex: 3; /* Represents 60% width */
-    flex-direction: column;
-    justify-content: space-between; /* Aligns chat form to the bottom */
-    height: 100%; /* Full height of the parent container */
-    overflow: hidden; /* Prevents overflow issues */
-    /* Removed width property */
-}
-
-/* Style the chat messages section */
-.chat-messages {
-    flex: 1; /* Takes up all remaining space */
-    overflow-y: auto; /* Allows scrolling for long chat history */
-    padding: 10px; /* Optional: Adds spacing */
-    background-color: #f9f9f9; /* Optional: Background color */
-}
-
-/* Style the chat form */
-.chat-form {
-    display: flex;
-    gap: 20px; /* Space between textarea and buttons */
-    padding: 10px; /* Adds spacing around the form */
-    background-color: #fff; /* Optional: Background color */
-    
-    border-top: 1px solid #ddd; /* Optional: Border to separate from messages */
-}
-
-/* Style the textarea */
-#userinput {
-    flex: 1; /* Textarea takes up most of the space */
-    resize: none; /* Prevent manual resizing */
-    height: 40px; /* Set a fixed height */
-    padding: 0 10px; /* Horizontal padding */
-    font-size: 16px; /* Adjust font size */
-    line-height: 40px; /* Match line-height to height for vertical centering */
-    border-radius: 8px; /* Reduced border-radius for slight rounding */
-    border: 1px solid #ccc; /* Optional: Add a border for better visibility */
-    overflow: hidden; /* Hide overflow */
-}
-
-/* Style the buttons */
-button {
-    padding: 10px 15px;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-body {
-    margin: 0; /* Remove default margin */
-  
-    width: 100%; /* Changed from 100vh to 100% */
-}
-
-/* Navigation Bar */
+/* 4. Navigation Bar */
 nav {
     position: fixed; /* Keep the navbar fixed */
     top: 0;
     left: 0;
     width: 100%;
-    height: 50px; /* Adjust this to match your navbar's actual height */
+    height: 50px; /* Navbar height */
     box-shadow: 1px 1px 5px #80808057;
     background-color: white;
     border-bottom: 1px solid gray;
@@ -120,7 +66,7 @@ nav {
     font-weight: bold;
 }
 
-/* Left Sidebar (Chat History) */
+/* 5. Left Sidebar (Chat History) */
 .chat-history {
     flex: 0 0 20%; /* Fixed width at 20% */
     background-color: #202123; /* Dark background similar to ChatGPT */
@@ -138,11 +84,11 @@ nav {
 @media screen and (max-width: 768px) {
     .chat-history {
         position: fixed;
-        top: 50px;
+        top: 50px; /* Below the navbar */
         left: 0;
-        height: calc(100vh - 50px);
+        height: calc(100vh - 50px); /* Full height minus navbar */
         z-index: 999;
-        transform: translateX(-100%);
+        transform: translateX(-100%); /* Hidden off-screen */
         width: 250px;
     }
 }
@@ -162,6 +108,7 @@ nav {
     align-items: center;
     gap: 10px;
     border-radius: 5px;
+    cursor: pointer;
 }
 
 #new-chat-button:hover {
@@ -196,6 +143,7 @@ nav {
     display: flex;
     align-items: center;
     gap: 10px;
+    cursor: pointer;
 }
 
 .chat-history-item-button:hover {
@@ -217,6 +165,7 @@ nav {
     align-items: center;
     gap: 10px;
     border-radius: 5px;
+    cursor: pointer;
 }
 
 #delete-all-chats-button:hover {
@@ -228,7 +177,7 @@ nav {
     height: 16px;
 }
 
-/* Right Sidebar (Chat Playlist) */
+/* 6. Right Sidebar (Chat Playlist) */
 .chat-playlist {
     flex: 0 0 20%; /* Fixed width at 20% */
     background-color: #121212; /* Dark background similar to Spotify */
@@ -246,11 +195,11 @@ nav {
 @media screen and (max-width: 768px) {
     .chat-playlist {
         position: fixed;
-        top: 50px;
+        top: 50px; /* Below the navbar */
         right: 0;
-        height: calc(100vh - 50px);
+        height: calc(100vh - 50px); /* Full height minus navbar */
         z-index: 999;
-        transform: translateX(100%);
+        transform: translateX(100%); /* Hidden to the right */
         width: 250px;
     }
 }
@@ -267,7 +216,7 @@ nav {
     margin: 0;
 }
 
-/* Spotify Button */
+/* Spotify Buttons */
 #connect-spotify-button,
 #export-playlist-button {
     width: 100%;
@@ -282,6 +231,8 @@ nav {
     border-radius: 5px;
     margin-top: 10px;
     font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 #connect-spotify-button:hover,
@@ -304,6 +255,7 @@ nav {
     align-items: center;
     padding: 15px 20px;
     transition: background-color 0.2s;
+    cursor: pointer;
 }
 
 .playlist-item:hover {
@@ -354,7 +306,74 @@ nav {
     height: 20px;
 }
 
-/* Messages */
+/* 7. Main Chat Box */
+.box {
+    display: flex;
+    flex: 3; /* Represents 60% width */
+    flex-direction: column;
+    justify-content: space-between; /* Aligns chat form to the bottom */
+    height: 100%; /* Full height of the parent container */
+    overflow: hidden; /* Prevents overflow issues */
+}
+
+/* Chat Messages Section */
+.chat-messages {
+    flex: 1; /* Takes up all remaining space */
+    overflow-y: auto; /* Allows scrolling for long chat history */
+    padding: 10px; /* Adds spacing */
+    background-color: #f9f9f9; /* Background color */
+    scrollbar-width: thin;
+    scrollbar-color: #888 transparent;
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+/* Chat Form */
+.chat-form {
+    display: flex;
+    gap: 20px; /* Space between textarea and buttons */
+    padding: 10px; /* Adds spacing around the form */
+    background-color: #fff; /* Background color */
+    border-top: 1px solid #ddd; /* Border to separate from messages */
+}
+
+#userinput {
+    flex: 1; /* Textarea takes up most of the space */
+    resize: none; /* Prevent manual resizing */
+    height: 40px; /* Fixed height */
+    padding: 0 10px; /* Horizontal padding */
+    font-size: 16px; /* Font size */
+    line-height: 40px; /* Match line-height to height for vertical centering */
+    border-radius: 8px; /* Slight rounding */
+    border: 1px solid #ccc; /* Border for visibility */
+    overflow: hidden; /* Hide overflow */
+}
+
+button {
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #ddd;
+}
+
+/* 8. Messages Styling */
 .message {
     margin: 20px;
 }
@@ -391,7 +410,8 @@ nav {
     word-wrap: break-word;
 }
 
-/* Logout Button Styling */
+
+/* 9. Logout Button Styling */
 #logout-form {
     margin-left: auto;
 }
@@ -409,179 +429,27 @@ nav {
     background-color: #e60000;
 }
 
-/* Adjustments for Responsiveness */
+/* 10. Action Frame */
+.Frame248 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 578px;
+}
+
+/* 11. Responsive Styles */
+
+/* Medium Devices (Tablets, 768px and below) */
 @media screen and (max-width: 768px) {
+    /* Adjust Container */
     .container {
         flex-direction: column;
-        margin-top: 50px;
-        height: auto;
+        margin-top: 50px; /* Space for navbar */
+        height: calc(100vh - 50px); /* Full height minus navbar */
     }
 
-    .chat-history,
-    .chat-playlist {
-        flex: none;
-        width: 250px;
-    }
-
-    .box {
-        width: 100%;
-        margin-top: 0;
-    }
-
-    .sidebar-toggle {
-        display: block;
-        position: fixed;
-        top: 60px;
-        z-index: 1000;
-        background-color: #1DB954;
-        color: #fff;
-        border: none;
-        padding: 10px;
-        border-radius: 5px;
-        font-size: 1em;
-        cursor: pointer;
-    }
-
-    #toggle-chat-history {
-        left: 10px;
-    }
-
-    #toggle-chat-playlist {
-        right: 10px;
-    }
-}
-
-@media screen and (min-width: 769px) {
-    .sidebar-toggle {
-        display: none;
-    }
-}
-
-/* Scrollbar Styling */
-.chat-history,
-.chat-playlist,
-.chat-messages {
-    scrollbar-width: thin;
-    scrollbar-color: #888 transparent;
-}
-
-.chat-history::-webkit-scrollbar,
-.chat-playlist::-webkit-scrollbar,
-.chat-messages::-webkit-scrollbar {
-    width: 8px;
-}
-
-.chat-history::-webkit-scrollbar-thumb,
-.chat-playlist::-webkit-scrollbar-thumb,
-.chat-messages::-webkit-scrollbar-thumb {
-    background-color: #888;
-    border-radius: 4px;
-}
-
-.chat-history::-webkit-scrollbar-track,
-.chat-playlist::-webkit-scrollbar-track,
-.chat-messages::-webkit-scrollbar-track {
-    background-color: transparent;
-}
-
-/* Ensure sidebars and main content fill the full width */
-.container {
-    width: 100%;
-    margin: 0;
-}
-
-.chat-history,
-.chat-playlist {
-    flex-shrink: 0;
-}
-
-/* Popup Container */
-.popup-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-/* Hidden Class */
-.popup-container.hidden {
-    display: none;
-}
-
-/* Popup Box */
-.popup {
-    background: #ffffff;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 400px;
-    padding: 20px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    animation: fade-in 0.3s ease-in-out;
-    position: relative;
-}
-
-/* Top-Left Close Button */
-.popup-close-left {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: none;
-    border: none;
-    font-size: 20px;
-    color: #ff4d4d; /* Red color */
-    cursor: pointer;
-    transition: color 0.2s ease-in-out;
-}
-
-.popup-close-left:hover {
-    color: #e60000; /* Darker red on hover */
-}
-
-/* Popup Content */
-.popup-content {
-    margin-top: 20px;
-}
-
-.popup-content p {
-    font-size: 16px;
-    margin-bottom: 20px;
-}
-
-.popup-link {
-    display: inline-block;
-    background-color: #1db954;
-    color: white;
-    padding: 10px 20px;
-    text-decoration: none;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-.popup-link:hover {
-    background-color: #1ed760;
-}
-
-/* Fade-in Animation */
-@keyframes fade-in {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-
-@media screen and (max-width: 768px) {
     /* Hide sidebars by default */
     .chat-history,
     .chat-playlist {
@@ -608,10 +476,14 @@ nav {
         transform: translateX(0); /* Slide into view */
     }
 
-    /* Main chat box adjustments */
+    /* Main Chat Box Adjustments */
     .box {
-        margin: 0 auto; /* Center when sidebars are hidden */
-        width: 100%; /* Full width */
+        width: 100%;
+        margin: 0 auto;
+        height: 100%; /* Fill the container's height */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         transition: margin-left 0.3s ease-in-out, margin-right 0.3s ease-in-out;
     }
 
@@ -623,7 +495,12 @@ nav {
         margin-right: 250px; /* Adjust when right sidebar is open */
     }
 
-    /* Toggle buttons */
+    /* Ensure .chat-messages takes up available space */
+    .chat-messages {
+        flex-grow: 1;
+    }
+
+    /* Toggle Buttons */
     .sidebar-toggle {
         display: block; /* Ensure buttons are visible */
         position: fixed;
@@ -649,4 +526,174 @@ nav {
     .sidebar-toggle:hover {
         background-color: #1ed760; /* Brighter green on hover */
     }
+
+    /* Adjust Chat Form */
+    .chat-form {
+        padding: 10px;
+        gap: 10px; /* Reduce gap between textarea and buttons */
+    }
+
+    #userinput {
+        height: 40px; /* Adjust height if necessary */
+        font-size: 14px; /* Adjust font size for better readability */
+    }
+
+    button {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    /* Adjust Messages for Smaller Screens */
+    .usermessagediv,
+    .appmessagediv {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .usermessage,
+    .appmessage {
+        max-width: 100%;
+    }
+}
+
+/* Small Devices (Portrait Phones, 480px and below) */
+@media screen and (max-width: 480px) {
+    /* Further adjust chat-playlist and chat-history if necessary */
+
+    .chat-playlist-header,
+    .chat-history-header {
+        padding: 15px;
+    }
+
+    /* Ensure chat form remains at the bottom */
+    .box {
+        height: calc(100vh - 50px); /* Ensure full height minus navbar */
+    }
+
+    /* Adjust chat messages padding */
+    .chat-messages {
+        padding: 8px;
+    }
+
+    .appmessage {
+        max-width: 65%;
+    }
+}
+
+/* Extra Small Devices (Portrait Phones, 300px and below) */
+@media screen and (max-width: 300px) {
+    /* Similar adjustments as smaller screens */
+
+    .chat-playlist-header,
+    .chat-history-header {
+        padding: 10px;
+    }
+
+    .chat-playlist,
+    .chat-history {
+        width: 200px; /* Slightly narrower sidebars */
+    }
+
+    /* Ensure chat form remains accessible */
+    .chat-form {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    button {
+        width: 100%;
+    }
+    .appmessage {
+        max-width: 70%;
+    }
+}
+
+/* 12. Popup Styles */
+.popup-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-container.hidden {
+    display: none;
+}
+
+.popup {
+    background: #ffffff;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    padding: 20px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    animation: fade-in 0.3s ease-in-out;
+    position: relative;
+}
+
+.popup-close-left {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #ff4d4d; /* Red color */
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+.popup-close-left:hover {
+    color: #e60000; /* Darker red on hover */
+}
+
+.popup-content {
+    margin-top: 20px;
+}
+
+.popup-content p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.popup-link {
+    display: inline-block;
+    background-color: #1db954;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.popup-link:hover {
+    background-color: #1ed760;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.container {
+    width: 100%;
+    margin: 0;
+}
+
+.chat-history,
+.chat-playlist {
+    flex-shrink: 0;
 }

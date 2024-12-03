@@ -1,33 +1,49 @@
+/* 1. Global Styles */
+*,
+*::before,
+*::after {
+    box-sizing: border-box; 
+}
+
 body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
     background: white;
 }
 
+/* 2. SignUp Container */
 .SignUp {
     width: 100%;
-    height: 100vh;
+    min-height: 100vh; /* Ensure it covers the full viewport height */
     background: white;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 20px; /* Added padding for better spacing on small devices */
 }
 
+/* 3. Icon Image */
 .icon-image {
     display: block;
     margin: 0 auto 20px;
     width: 80px;
+    max-width: 100%; /* Ensure it doesn't exceed the container's width */
     height: auto; /* Maintain aspect ratio */
 }
 
+/* 4. Content Wrapper */
 .Content {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 48px;
     text-align: center;
+    width: 100%;
+    max-width: 578px; /* Set a max-width for larger screens */
 }
 
+/* 5. Header Frame */
 .Frame245 {
     display: flex;
     flex-direction: column;
@@ -39,34 +55,44 @@ body {
     color: #333333;
     font-size: 32px;
     font-weight: 500;
+    margin: 0; /* Remove default margin */
+    word-wrap: break-word; /* Prevent long words from overflowing */
 }
 
+/* 6. Form Frame */
 .Frame254 {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 40px;
+    width: 100%;
 }
 
+/* 7. Basic Information Section */
 .BasicInfo {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    width: 100%;
 }
 
+/* 8. Text Fields */
 .TextField {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    width: 100%;
 }
 
 .Label {
     color: #666666;
     font-size: 16px;
+    margin-bottom: 4px;
 }
 
 .Input {
-    width: 578px;
+    width: 100%;
+    max-width: 578px;
     height: 56px;
     border: 1px solid rgba(102, 102, 102, 0.35);
     border-radius: 12px;
@@ -93,16 +119,11 @@ body {
     margin-top: 4px;
 }
 
-/* GenreSelection */
+/* 9. Genre Selection */
 .GenreSelection {
     text-align: center;
-    width: 578px;
-}
-
-.Label {
-    margin-bottom: 8px;
-    font-size: 16px;
-    color: #666666;
+    width: 100%;
+    max-width: 578px;
 }
 
 .CheckboxContainer {
@@ -120,10 +141,10 @@ body {
 
 .ScrollableCheckboxes {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Two columns for genres */
+    grid-template-columns: repeat(3, 1fr); /* Three columns for genres */
     gap: 8px;
     max-height: 150px; /* Adjust to leave padding */
-    overflow-y: scroll; /* Enable vertical scrolling */
+    overflow-y: auto; /* Enable vertical scrolling */
     padding: 8px;
     width: 100%;
 }
@@ -171,15 +192,20 @@ body {
     font-weight: bold;
 }
 
+/* 10. Action Frame */
 .Frame248 {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 16px;
+    width: 100%;
+    max-width: 578px;
 }
 
+/* 11. Buttons */
 .Button {
-    width: 578px;
+    width: 100%;
+    max-width: 578px;
     height: 64px;
     background: #111111;
     border-radius: 40px;
@@ -189,6 +215,7 @@ body {
     opacity: 0.25;
     cursor: not-allowed;
     border: none;
+    transition: opacity 0.3s, cursor 0.3s;
 }
 
 .Button:enabled {
@@ -196,19 +223,9 @@ body {
     cursor: pointer;
 }
 
-.HaveAnAccountLogin {
-    font-size: 16px;
-    color: #333333;
-}
-
-.LoginLink {
-    color: #111111;
-    text-decoration: underline;
-    margin-left: 5px;
-}
-
 .SpotifyButton {
-    width: 578px;
+    width: 100%;
+    max-width: 578px;
     height: 56px;
     background: #1DB954;
     color: white;
@@ -222,13 +239,28 @@ body {
 
 .SpotifyButton:hover {
     background: #1AA34A;
-} 
+}
+
+/* 12. Login Link */
+.HaveAnAccountLogin {
+    font-size: 16px;
+    color: #333333;
+}
+
+.LoginLink {
+    color: #111111;
+    text-decoration: underline;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+/* 13. Responsive Styles */
+
+/* Medium Devices (Tablets, 768px and below) */
 @media screen and (max-width: 768px) {
-    /* General adjustments for mobile */
     .SignUp {
         padding: 16px;
         height: auto; /* Allow content to adjust to the screen size */
-        overflow: hidden;
     }
 
     .Content {
@@ -261,12 +293,9 @@ body {
         font-size: 16px; /* Adjust font size */
     }
 
-    .HaveAnAccountLogin {
-        font-size: 14px; /* Reduce font size */
-    }
-
+    .HaveAnAccountLogin,
     .LoginLink {
-        font-size: 14px; /* Match smaller text size */
+        font-size: 14px; /* Reduce font size */
     }
 
     /* GenreSelection */
@@ -275,7 +304,7 @@ body {
     }
 
     .ScrollableCheckboxes {
-        grid-template-columns: repeat(2, 1fr); /* Fewer columns for smaller screens */
+        grid-template-columns: repeat(2, 1fr); /* Two columns for smaller screens */
         gap: 4px; /* Reduce gap between checkboxes */
         max-height: 120px; /* Adjust height for smaller screen space */
         padding: 4px; /* Reduce padding */
@@ -293,5 +322,42 @@ body {
     /* Error messages */
     .ErrorMessage {
         font-size: 12px; /* Smaller font size for error messages */
+    }
+}
+
+/* Small Devices (Portrait Phones, 480px and below) */
+@media screen and (max-width: 480px) {
+    .sign-up-header {
+        font-size: 20px;
+    }
+
+    .ScrollableCheckboxes {
+        grid-template-columns: repeat(2, 1fr); /* Ensure two per row */
+        max-height: 100px; /* Further adjust height */
+        padding: 4px;
+    }
+
+    .CustomCheckbox {
+        font-size: 14px;
+        padding: 6px;
+    }
+}
+
+/* Extra Small Devices (Portrait Phones, 300px and below) */
+@media screen and (max-width: 300px) {
+    .sign-up-header {
+        overflow: hidden;
+        font-size: 20px;
+    }
+
+    .ScrollableCheckboxes {
+        grid-template-columns: repeat(2, 1fr); /* Ensure two per row */
+        max-height: 100px; /* Further adjust height */
+        padding: 4px;
+    }
+
+    .CustomCheckbox {
+        font-size: 14px;
+        padding: 6px;
     }
 }

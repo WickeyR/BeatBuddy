@@ -138,7 +138,7 @@ app.post('/api/messageGPT', async (req, res) => {
     const userGenres = genresResults.map((row) => row.genre);
 
     // Include the genres in the system prompt
-    const systemPrompt = `You are Beat Buddy, a music recommender. Guide the user and make playlists based on their inputs and suggestions.`;
+    const systemPrompt = 'You are Beat Buddy, a music recommender. Guide the user and make playlists based on their inputs and suggestions.';
     const aiMessages = [
       { role: 'system', content: systemPrompt },
       ...conversationHistory,
@@ -149,11 +149,11 @@ app.post('/api/messageGPT', async (req, res) => {
 
     // Call OpenAI API
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o-mini',
       messages: sanitizedMessages,
       functions: functionDefinitions,
       function_call: 'auto',
-      max_tokens: 250,
+      max_tokens: 175,
       temperature: 0.7,
     });
 
@@ -286,9 +286,9 @@ app.post('/api/messageGPT', async (req, res) => {
 
       // Call the OpenAI API again with updated conversation history
       const completion2 = await openai.chat.completions.create({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: sanitizeMessages(conversationHistory),
-        max_tokens: 250,
+        max_tokens: 175,
         temperature: 0.7,
       });
 
