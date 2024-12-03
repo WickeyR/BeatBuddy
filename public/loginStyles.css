@@ -3,51 +3,155 @@ body, html {
     margin: 0;
     padding: 0;
     height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: Arial, sans-serif;
-    background-color: #000;
     overflow: hidden;
-}
-
-/* Background image grid */
-.background-images {
+    font-family: 'Outfit', sans-serif;
+  }
+  
+  /* Background image grid */
+  .background-images {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-gap: 5px;
+    grid-template-columns: repeat(auto-fill, minmax(20%, 1fr));
+    grid-gap: 0;
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 200%;
+    height: 1200%;
     z-index: 1;
-    animation: scrollUp 30s linear infinite; 
-}
-
-.background-images img {
+    animation: scrollUp 60s linear infinite;
+  }
+  
+  .background-images div {
+    position: relative;
     width: 100%;
-    height: auto; 
-    object-fit: contain; 
-    opacity: 0.3; 
-}
-
-/* Scrolling animation */
-@keyframes scrollUp {
+    aspect-ratio: 1 / 1;
+  }
+  
+  .background-images img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.3;
+  }
+  
+  /* Scrolling animation */
+  @keyframes scrollUp {
     0% {
-        transform: translateY(0);
+      transform: translateY(0);
     }
     100% {
-        transform: translateY(-50%); 
+      transform: translateY(-50%);
     }
-}
-
-.overlay {
-    position: relative; 
-    z-index: 2; 
+  }
+  
+  /* Overlay and form */
+  .login-page {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .overlay {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(180deg, #fbfafb 0%, #ffffff 100%);
+    width: 400px;
+    padding: 30px;
     text-align: center;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 0 30px rgba(205, 198, 219, 0.3);
+  }
+  
+  .top-texture {
+    width: 100%;
+    height: 15px;
+    margin-bottom: 20px;
+    background: repeating-linear-gradient(
+      90deg,
+      #57339f,
+      #57339f 1px,
+      transparent 1px,
+      transparent 10px
+    );
+  }
+  
+  .form-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  
+  .input-container {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  
+  .input-label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+  .icon-image {
+    display: block;
+    margin: 0 auto 20px; /* Center the image and add bottom spacing */
+    width: 60px; /* Set a smaller size for the image */
+    height: auto; /* Maintain aspect ratio */
+  }
+  input {
+    width: 100%;
+    padding: 10px;
     border-radius: 8px;
-    color: #fff;
-}
+    border: 1px solid #e7e7e7;
+    font-size: 14px;
+  }
+  
+  .submit-button {
+    text-transform: uppercase;
+    background: #000000;
+    width: 100%;
+    border: none;
+    padding: 15px;
+    color: #ffffff;
+    font-size: 14px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .submit-button:hover {
+    background: #333333;
+  }
+  
+  .login-prompt {
+    margin-top: 20px;
+    font-size: 14px;
+  }
+  
+  .login-link {
+    color: #9c6fff;
+    font-weight: 600;
+    text-decoration: underline;
+  }
+  
+
+
+
+  @media screen and (max-width: 1400px) {
+    .background-images {
+      grid-template-columns: repeat(auto-fill, minmax(25%, 1fr));
+    }
+  }
+  
+  @media screen and (max-width: 900px) {
+    .background-images {
+      grid-template-columns: repeat(auto-fill, minmax(50%, 1fr));
+    }
+  }
+  

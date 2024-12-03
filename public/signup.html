@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="signupStyles.css">
+</head>
+<body>
+    <div class="SignUp">
+        <div class="Content">
+            <div class="Frame245">
+                <img src="images/BeatBuddyIcon.png" alt="BeatBuddy Icon" class="icon-image" />
+                <div class="sign-up-header">Sign up for BeatBuddy</div>
+            </div>
+            <!-- Start of the form -->
+            <form action="/signup" method="POST" id="signupForm">
+                <div class="Frame254">
+                    <div class="BasicInfo">
+                        <div class="TextField">
+                            <label class="Label" for="username">Username</label>
+                            <input class="Input" id="username" name="username" type="text" placeholder="Enter your username" required>
+                        </div>
+                        <div class="TextField">
+                            <label class="Label" for="password">Password</label>
+                            <div class="PasswordContainer">
+                                <input class="Input" id="password" name="password" type="password" placeholder="Enter your password" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="GenreSelection">
+                        <div class="Label">Select your favorite genres:</div>
+                        <div class="CheckboxContainer">
+                            <div class="ScrollableCheckboxes">
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="rock">
+                                    <span>Rock</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="hip-hop">
+                                    <span>Hip-Hop</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="indie">
+                                    <span>Indie</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="jazz">
+                                    <span>Jazz</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="reggae">
+                                    <span>Reggae</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="british">
+                                    <span>British</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="punk">
+                                    <span>Punk</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="80s">
+                                    <span>80s</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="dance">
+                                    <span>Dance</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="acoustic">
+                                    <span>Acoustic</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="rnb">
+                                    <span>R&B</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="hardcore">
+                                    <span>Hardcore</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="country">
+                                    <span>Country</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="blues">
+                                    <span>Blues</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="alternative">
+                                    <span>Alternative</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="classical">
+                                    <span>Classical</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="electronic">
+                                    <span>Electronic</span>
+                                </label>
+                                <label class="CustomCheckbox">
+                                    <input type="checkbox" name="genres[]" value="metal">
+                                    <span>Metal</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Frame248">
+                        <!-- Sign up button is disabled by default -->
+                        <button type="submit" class="Button" disabled>Sign up</button>
+                        <div class="HaveAnAccountLogin">
+                            <span>Already have an account?</span>
+                            <a href="/login" class="LoginLink">Log in</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <!-- End of the form -->
+        </div>
+    </div>
+    <script>
+        // Enable the "Sign up" button when all required fields are filled
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('signupForm');
+            const username = document.getElementById('username');
+            const password = document.getElementById('password');
+            const submitButton = document.querySelector('.Button');
+
+            form.addEventListener('input', function () {
+                if (username.value.trim() !== '' && password.value.trim() !== '') {
+                    submitButton.disabled = false;
+                    submitButton.classList.add('enabled');
+                } else {
+                    submitButton.disabled = true;
+                    submitButton.classList.remove('enabled');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -3,7 +3,19 @@
     box-sizing: border-box;
 }
 
-/* Container for the entire application */
+/* Wrapper to ensure everything is centered */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vn;
+}
+
+/* Container for application */
 .container {
     display: flex; /* Enables flexbox */
     flex-direction: row; /* Horizontal alignment */
@@ -12,6 +24,8 @@
     height: 100vh; /* Make it take the full height of the viewport */
     gap: 10px; /* Adds spacing between the containers */
     width: 100%; /* Changed from 100vh to 100% */
+    padding-top: 50px;
+    margin: 0;
 }
 
 /* Main Chat Box */
@@ -108,99 +122,236 @@ nav {
 
 /* Left Sidebar (Chat History) */
 .chat-history {
-    flex: 1; /* Represents 20% width */
-    min-width: 200px; /* Optional: Set a minimum width for the sidebars */
-    background-color: #f4f4f4; /* Optional: Add background color */
-    padding: 10px; /* Optional: Add padding */
-    overflow-y: auto; /* Enable scrolling if content overflows */
+    flex: 0 0 20%; /* Fixed width at 20% */
+    background-color: #202123; /* Dark background similar to ChatGPT */
+    color: #d1d5db; /* Light text color */
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    transition: transform 0.3s ease-in-out;
 }
 
-/* Right Sidebar (Chat Playlist) */
-.chat-playlist {
-    flex: 1; /* Represents 20% width */
-    min-width: 200px; /* Optional: Set a minimum width for the sidebars */
-    background-color: #f4f4f4; /* Optional: Add background color */
-    padding: 10px; /* Optional: Add padding */
-    overflow-y: auto; /* Enable scrolling if content overflows */
+.chat-history.visible {
+    transform: translateX(0);
 }
 
-.chat-history h2,
-.chat-playlist h2 {
-    font-size: 1.5em;
-    margin-bottom: 10px;
+@media screen and (max-width: 768px) {
+    .chat-history {
+        position: fixed;
+        top: 50px;
+        left: 0;
+        height: calc(100vh - 50px);
+        z-index: 999;
+        transform: translateX(-100%);
+        width: 250px;
+    }
+}
+
+/* Chat History Header */
+.chat-history-header {
+    padding: 10px;
 }
 
 #new-chat-button {
     width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    background-color: #097df1;
-    color: #fff;
+    padding: 10px;
+    background-color: #343541;
+    color: #d1d5db;
     border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-#export-playlist-button,
-#connect-spotify-button{
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    background-color: #1DB954;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-#connect-spotify-button:hover {
-    background-color: #168e40;
-}
-#new-chat-button:hover {
-    background-color: #005bb5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 5px;
 }
 
+#new-chat-button:hover {
+    background-color: #454654;
+}
+
+.icon-plus {
+    width: 16px;
+    height: 16px;
+}
+
+/* Chat History List */
 #chat-history-list {
     list-style-type: none;
     padding: 0;
     margin: 0;
+    flex-grow: 1;
+    overflow-y: auto;
 }
 
 .chat-history-item {
     width: 100%;
-    padding: 8px;
-    margin-bottom: 4px;
+}
+
+.chat-history-item-button {
+    width: 100%;
+    padding: 10px;
     text-align: left;
-    background-color: #ffffff;
+    background-color: transparent;
+    color: #d1d5db;
     border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.chat-history-item:hover {
-    background-color: #e0e0e0;
+.chat-history-item-button:hover {
+    background-color: #343541;
 }
 
-/* Upper part of the chat (messages display area) */
-.upper {
-    flex: 1;
-    padding-top: 100px;
-    padding-bottom: 170px; /* Adjust to make room for input area */
+/* Chat History Footer */
+.chat-history-footer {
+    padding: 10px;
+}
+
+#delete-all-chats-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #343541;
+    color: #d1d5db;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 5px;
+}
+
+#delete-all-chats-button:hover {
+    background-color: #454654;
+}
+
+.icon-trash {
+    width: 16px;
+    height: 16px;
+}
+
+/* Right Sidebar (Chat Playlist) */
+.chat-playlist {
+    flex: 0 0 20%; /* Fixed width at 20% */
+    background-color: #121212; /* Dark background similar to Spotify */
+    color: #fff; /* White text color */
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
+    transition: transform 0.3s ease-in-out;
 }
 
-.upper::-webkit-scrollbar {
-    width: 0 !important;
+.chat-playlist.visible {
+    transform: translateX(0);
 }
 
-/* Bottom part of the chat (input area) */
-.bottom {
-    position: fixed;
-    bottom: 0;
-    padding-bottom: 5%;
-    background-color: white;
-    width: 80%; /* Match the width of .box if necessary */
+@media screen and (max-width: 768px) {
+    .chat-playlist {
+        position: fixed;
+        top: 50px;
+        right: 0;
+        height: calc(100vh - 50px);
+        z-index: 999;
+        transform: translateX(100%);
+        width: 250px;
+    }
+}
+
+/* Chat Playlist Header */
+.chat-playlist-header {
+    padding: 20px 20px 10px 20px;
+    border-bottom: 1px solid #282828;
+}
+
+.chat-playlist h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* Spotify Button */
+#connect-spotify-button,
+#export-playlist-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #1DB954;
+    color: #fff;
+    border: none;
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-size: 1em;
+}
+
+#connect-spotify-button:hover,
+#export-playlist-button:hover {
+    background-color: #1ed760;
+}
+
+/* Chat Playlist List */
+#chat-playlist-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Playlist Items */
+.playlist-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    transition: background-color 0.2s;
+}
+
+.playlist-item:hover {
+    background-color: #282828;
+}
+
+.song-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    margin-right: 15px;
+    border-radius: 4px;
+}
+
+.song-details {
+    flex-grow: 1;
+}
+
+.song-title {
+    font-weight: bold;
+    color: #fff;
+    margin: 0;
+    font-size: 1em;
+}
+
+.song-artist {
+    color: #b3b3b3;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+/* Delete Button */
+.delete-button {
+    background: none;
+    border: none;
+    color: #b3b3b3;
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.delete-button:hover {
+    color: #fff;
+}
+
+.delete-icon {
+    width: 20px;
+    height: 20px;
 }
 
 /* Messages */
@@ -240,136 +391,6 @@ nav {
     word-wrap: break-word;
 }
 
-/* Input Container */
-.input-container {
-    display: flex;
-    align-items: center;
-    background-color: #f9f9f9; 
-    border-radius: 8px;
-    width: 100%;
-    padding: 10px;
-}
-
-.textarea {
-    flex: 1;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    margin-right: 8px;
-    resize: none;
-    font-size: 1em;
-}
-
-.send-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 8px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.send-button:hover {
-    background-color: #0056b3;
-}
-
-.icon {
-    width: 24px;
-    height: 24px;
-}
-
-.open-modal {
-    margin-left: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 8px;
-    background-color: #1FE365;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.open-modal:hover {
-    background-color: #17c25e;
-}
-
-#sendbtn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.downwarning {
-    display: flex;
-    justify-content: center;
-    margin-top: 5px;
-    font-size: 90%;
-    color: gray;
-}
-
-/* Modal Styles */
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed;
-    z-index: 1001; /* Ensure modal is above other elements */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
-}
-
-/* Modal content */
-.modal-content {
-    background-color: #fff;
-    margin: 5% auto; /* Adjust as needed */
-    padding: 20px;
-    border: 1px solid #888;
-    width: 30%;
-    border-radius: 8px;
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
-/* Close button */
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: #000;
-    cursor: pointer;
-}
-
-/* Playlist item styles */
-.playlist-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.playlist-item img {
-    width: 50px;
-    height: 50px;
-    margin-right: 10px;
-    border-radius: 4px;
-}
-
-.playlist-info {
-    display: flex;
-    flex-direction: column;
-}
-
 /* Logout Button Styling */
 #logout-form {
     margin-left: auto;
@@ -388,89 +409,173 @@ nav {
     background-color: #e60000;
 }
 
-
-
-.chat-playlist {
-    width: 300px;
-    overflow-y: auto;
-  }
-  
-  .chat-playlist h2 {
-    text-align: center;
-    margin-bottom: 10px;
-  }
-  
-  #chat-playlist-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .playlist-item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-  }
-  
-  .song-image {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    margin-right: 10px;
-  }
-  
-  .song-details {
-    flex-grow: 1;
-  }
-  
-  .song-title {
-    font-weight: bold;
-  }
-  
-  .song-artist {
-    color: #666;
-  }
-  
-  .delete-button {
-    background: none;
-    border: none;
-    color: #f00;
-    font-size: 20px;
-    cursor: pointer;
-  }
-  
-  .delete-button:hover {
-    color: #c00;
-  }
-  
-
-/* Media Queries for Responsiveness */
+/* Adjustments for Responsiveness */
 @media screen and (max-width: 768px) {
     .container {
         flex-direction: column;
+        margin-top: 50px;
+        height: auto;
     }
 
     .chat-history,
     .chat-playlist {
-        width: 100%;
-        height: auto;
-        order: 1;
+        flex: none;
+        width: 250px;
     }
 
     .box {
         width: 100%;
-        order: 2;
         margin-top: 0;
     }
 
-    .bottom {
-        width: 100%;
+    .sidebar-toggle {
+        display: block;
+        position: fixed;
+        top: 60px;
+        z-index: 1000;
+        background-color: #1DB954;
+        color: #fff;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 1em;
+        cursor: pointer;
     }
 
-    .upper {
-        padding-bottom: 200px; /* Adjust for input area on smaller screens */
+    #toggle-chat-history {
+        left: 10px;
+    }
+
+    #toggle-chat-playlist {
+        right: 10px;
     }
 }
 
+@media screen and (min-width: 769px) {
+    .sidebar-toggle {
+        display: none;
+    }
+}
 
+/* Scrollbar Styling */
+.chat-history,
+.chat-playlist,
+.chat-messages {
+    scrollbar-width: thin;
+    scrollbar-color: #888 transparent;
+}
+
+.chat-history::-webkit-scrollbar,
+.chat-playlist::-webkit-scrollbar,
+.chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-history::-webkit-scrollbar-thumb,
+.chat-playlist::-webkit-scrollbar-thumb,
+.chat-messages::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 4px;
+}
+
+.chat-history::-webkit-scrollbar-track,
+.chat-playlist::-webkit-scrollbar-track,
+.chat-messages::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+/* Ensure sidebars and main content fill the full width */
+.container {
+    width: 100%;
+    margin: 0;
+}
+
+.chat-history,
+.chat-playlist {
+    flex-shrink: 0;
+}
+
+/* Popup Container */
+.popup-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Hidden Class */
+.popup-container.hidden {
+    display: none;
+}
+
+/* Popup Box */
+.popup {
+    background: #ffffff;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    padding: 20px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    animation: fade-in 0.3s ease-in-out;
+    position: relative;
+}
+
+/* Top-Left Close Button */
+.popup-close-left {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #ff4d4d; /* Red color */
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+.popup-close-left:hover {
+    color: #e60000; /* Darker red on hover */
+}
+
+/* Popup Content */
+.popup-content {
+    margin-top: 20px;
+}
+
+.popup-content p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.popup-link {
+    display: inline-block;
+    background-color: #1db954;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.popup-link:hover {
+    background-color: #1ed760;
+}
+
+/* Fade-in Animation */
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

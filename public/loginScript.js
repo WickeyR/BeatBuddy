@@ -1,34 +1,334 @@
+const imageUrl = [
+  "https://lastfm.freetls.fastly.net/i/u/300x300/16068ad3cd46f8fdfa67c697b0aef9e7.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/86fa0d410ba70ada74d22cf4b690b05b.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/a79564a9768d05272682b252deb02079.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/e69971625c379772fb79213dccfa194f.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/fa99444ff8c4ae992c7b211eb67b9db6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d204f358ae4063561370b9dc7c0cb8ca.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/788dfbc94a424d3b344aa97e68f68eed.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/4f091d5082e04691c6d7f4b2e2efbdc0.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d787d7eb7324e25dfb03dd9c0220d818.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/157a9990d5fc8a5b8252635d7994fa9e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b2cfb5bdf137f4d6293565205965750f.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/4debfeb504dc47779f0ff3df43fd9529.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/40564dd1a58f969fc3ee3c49bddffd23.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/38800e7fcb30a7791d92cb9958d00a48.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/a9c052ef2656668af3ba4753f2e1cbe7.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/06c9ee82c4cb73aceba1cea79312f4c6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/87138bbda83bd0ae8b4da2b6cab9b66a.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/1b3c1507a905b6c40475d0d565f6bebc.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/7fa4a91a71e669991e882a12c707a894.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/4bb4a3276e1da6aebbe9ca3a93fbabcf.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/5d53d7e6aad2f08c464e301d3bab6e96.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/53a7bd85bc99272900f620792bf43452.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/dd45b0438a315aed98b5830aa2fc43c5.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/c7cf0cd2fcd6efb0a33e063a8d82ff0e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b137d357e83f1634ae97beeb7390f6e7.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/ffdc425993df98b4a3d40d92dcc2a331.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/592f4d0933dc977245ef105e8a259b4f.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/ab5fafed3484610025812a001ca7a67e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/8ddd1959a2bef460a5149b3e0cf5e18a.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/35111049f3018537f75c238cb6febad4.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/ae9c3e4f65c0ac7efd2047d79b0e64f9.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/f650f979f3613c2f3f32570500350552.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/470f6627567c4a1cca31abf7617dfdca.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/1440cf82e580be651f7162bf6f44ff3e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/dcd9b642fec54a00a4cb310fd9775608.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/5fbcfb7258117e88cb73b45e25c88b01.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/ceee3cc941f48d37988de567ca10eca6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d719d1b09505d047ff77d1992d5341c1.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b6fca66574bfc4642d9ad279af5aa235.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/fae9c99bbb6ae827b508a97328551912.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/c2ecd547171fc923b5b32718a8e8780a.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/edba4e87b2ce983ee136723a809b0a0a.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/be7fa8a690d74035320a79944445e17c.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/0816434ded9aa9feb7b7f41fd4c15a60.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/a6ee015fe1bc4d86cdb9b7c76778e7a6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d8143d9ac2f959fa95987500ecc40242.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/32a51da6fd63d367f90d237a496837f5.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/f465c544093694268daf17e30a5c8112.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b705ae06953ab57080b289a6414a1702.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/76a48016ed81d0fa016d0fd5507792b0.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/374d84241878b54aa716bceefd66abd4.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/2d0f45e9a45eb0473566db0afbbdff08.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d3f083370c371a3ba1cddafaf193c27d.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/92ee7e4f3afdbe6a9a8c13a4a790baf1.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d2c51831aa2b59b93c7e56b29efbbcf6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/eb73d1fc4b9c4f2fb0ed820f1fcc61c1.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/f3aa2afa43dc94eb79562be7a23ce876.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/97ae7fe956f2b5f316845fe7976fc4e0.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/1c3f14fba3dececc85d10d7252e68b93.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/dc877a47d3e62e46a455b27d3da3bcaa.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/22b0e9b250ae50b46645ea292786b647.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/7e8aa58fcd8e7b2280c2e8a3fbf8d799.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/49cc807f69d59746b6b04be3434e6637.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/3c02d26ad6d9aaf4d16ea905622d7352.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/7e1bf5816b995f1b4b09291e9168849c.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/0f618fba18c6d7decc8e677b9504de22.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/c9e6ee0ac5fe5a7d92a249ae751c506e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/94ea8b4a5e7e022a67079609d27f92b1.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/41e3e5ec9fb119b47ffd0d1e6fdb9496.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/f6172279b43501c70719b85bd75cf2fa.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/709c71461153419d86742071e16426c8.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/576554c542da76c08f0e80c129afcb0e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/417f9093f56aa032be0355bfc29e8cff.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/bbbb0e0bdd0fcade424dcd7065e2c4dc.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d070e505cdab4b27cb39bfe28eb63343.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b8759014d94329fdc2be9f8eac1df359.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/0db2bb3f8dcebb4279db97dc7608d090.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/e5470e89852c293a4320df21cb3bf7e9.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/531bdb172f66ee3500e344936f1f22bd.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b7a4b3000d0c431fbce299986ac51c48.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/8e9b587a6f577478e9e6480235811f7d.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/aece583659ca803df09d3a0576ce8cd5.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/4cc406a032e2418daa5a768e3391820c.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/47dbda956c44d06fc1a4f8dbf1c77f00.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/32061f0904363502f73b77be7bb74eaf.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/3e6814b457a9087e0c46d5a949de2766.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/118cdb502af3929c505617d8e687e95c.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/e6d4821f6a554c7bc882a9fa75070dfe.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/106f80967620a3cb558658a5c474d819.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/24546ab04aeb584825f465d8968301c4.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/16068ad3cd46f8fdfa67c697b0aef9e7.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/86fa0d410ba70ada74d22cf4b690b05b.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/a79564a9768d05272682b252deb02079.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/e69971625c379772fb79213dccfa194f.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/fa99444ff8c4ae992c7b211eb67b9db6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d204f358ae4063561370b9dc7c0cb8ca.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/788dfbc94a424d3b344aa97e68f68eed.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/4f091d5082e04691c6d7f4b2e2efbdc0.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d787d7eb7324e25dfb03dd9c0220d818.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/157a9990d5fc8a5b8252635d7994fa9e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b2cfb5bdf137f4d6293565205965750f.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/4debfeb504dc47779f0ff3df43fd9529.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/40564dd1a58f969fc3ee3c49bddffd23.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/38800e7fcb30a7791d92cb9958d00a48.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/a9c052ef2656668af3ba4753f2e1cbe7.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/06c9ee82c4cb73aceba1cea79312f4c6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/87138bbda83bd0ae8b4da2b6cab9b66a.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/1b3c1507a905b6c40475d0d565f6bebc.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/7fa4a91a71e669991e882a12c707a894.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/4bb4a3276e1da6aebbe9ca3a93fbabcf.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/5d53d7e6aad2f08c464e301d3bab6e96.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/53a7bd85bc99272900f620792bf43452.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/dd45b0438a315aed98b5830aa2fc43c5.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/c7cf0cd2fcd6efb0a33e063a8d82ff0e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b137d357e83f1634ae97beeb7390f6e7.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/ffdc425993df98b4a3d40d92dcc2a331.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/592f4d0933dc977245ef105e8a259b4f.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/ab5fafed3484610025812a001ca7a67e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/8ddd1959a2bef460a5149b3e0cf5e18a.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/35111049f3018537f75c238cb6febad4.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/ae9c3e4f65c0ac7efd2047d79b0e64f9.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/f650f979f3613c2f3f32570500350552.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/470f6627567c4a1cca31abf7617dfdca.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/1440cf82e580be651f7162bf6f44ff3e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/dcd9b642fec54a00a4cb310fd9775608.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/5fbcfb7258117e88cb73b45e25c88b01.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/ceee3cc941f48d37988de567ca10eca6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d719d1b09505d047ff77d1992d5341c1.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b6fca66574bfc4642d9ad279af5aa235.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/fae9c99bbb6ae827b508a97328551912.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/c2ecd547171fc923b5b32718a8e8780a.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/edba4e87b2ce983ee136723a809b0a0a.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/be7fa8a690d74035320a79944445e17c.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/0816434ded9aa9feb7b7f41fd4c15a60.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/a6ee015fe1bc4d86cdb9b7c76778e7a6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d8143d9ac2f959fa95987500ecc40242.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/32a51da6fd63d367f90d237a496837f5.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/f465c544093694268daf17e30a5c8112.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b705ae06953ab57080b289a6414a1702.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/76a48016ed81d0fa016d0fd5507792b0.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/374d84241878b54aa716bceefd66abd4.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/2d0f45e9a45eb0473566db0afbbdff08.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d3f083370c371a3ba1cddafaf193c27d.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/92ee7e4f3afdbe6a9a8c13a4a790baf1.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d2c51831aa2b59b93c7e56b29efbbcf6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/eb73d1fc4b9c4f2fb0ed820f1fcc61c1.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/f3aa2afa43dc94eb79562be7a23ce876.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/97ae7fe956f2b5f316845fe7976fc4e0.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/1c3f14fba3dececc85d10d7252e68b93.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/dc877a47d3e62e46a455b27d3da3bcaa.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/22b0e9b250ae50b46645ea292786b647.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/7e8aa58fcd8e7b2280c2e8a3fbf8d799.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/49cc807f69d59746b6b04be3434e6637.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/3c02d26ad6d9aaf4d16ea905622d7352.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/7e1bf5816b995f1b4b09291e9168849c.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/0f618fba18c6d7decc8e677b9504de22.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/c9e6ee0ac5fe5a7d92a249ae751c506e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/94ea8b4a5e7e022a67079609d27f92b1.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/41e3e5ec9fb119b47ffd0d1e6fdb9496.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/f6172279b43501c70719b85bd75cf2fa.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/709c71461153419d86742071e16426c8.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/576554c542da76c08f0e80c129afcb0e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/417f9093f56aa032be0355bfc29e8cff.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/bbbb0e0bdd0fcade424dcd7065e2c4dc.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d070e505cdab4b27cb39bfe28eb63343.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b8759014d94329fdc2be9f8eac1df359.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/0db2bb3f8dcebb4279db97dc7608d090.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/e5470e89852c293a4320df21cb3bf7e9.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/531bdb172f66ee3500e344936f1f22bd.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b7a4b3000d0c431fbce299986ac51c48.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/8e9b587a6f577478e9e6480235811f7d.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/aece583659ca803df09d3a0576ce8cd5.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/4cc406a032e2418daa5a768e3391820c.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/47dbda956c44d06fc1a4f8dbf1c77f00.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/32061f0904363502f73b77be7bb74eaf.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/3e6814b457a9087e0c46d5a949de2766.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/118cdb502af3929c505617d8e687e95c.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/e6d4821f6a554c7bc882a9fa75070dfe.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/106f80967620a3cb558658a5c474d819.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/24546ab04aeb584825f465d8968301c4.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/16068ad3cd46f8fdfa67c697b0aef9e7.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/86fa0d410ba70ada74d22cf4b690b05b.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/a79564a9768d05272682b252deb02079.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/e69971625c379772fb79213dccfa194f.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/fa99444ff8c4ae992c7b211eb67b9db6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d204f358ae4063561370b9dc7c0cb8ca.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/788dfbc94a424d3b344aa97e68f68eed.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/4f091d5082e04691c6d7f4b2e2efbdc0.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d787d7eb7324e25dfb03dd9c0220d818.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/157a9990d5fc8a5b8252635d7994fa9e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b2cfb5bdf137f4d6293565205965750f.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/4debfeb504dc47779f0ff3df43fd9529.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/40564dd1a58f969fc3ee3c49bddffd23.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/38800e7fcb30a7791d92cb9958d00a48.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/a9c052ef2656668af3ba4753f2e1cbe7.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/06c9ee82c4cb73aceba1cea79312f4c6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/87138bbda83bd0ae8b4da2b6cab9b66a.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/1b3c1507a905b6c40475d0d565f6bebc.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/7fa4a91a71e669991e882a12c707a894.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/4bb4a3276e1da6aebbe9ca3a93fbabcf.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/5d53d7e6aad2f08c464e301d3bab6e96.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/53a7bd85bc99272900f620792bf43452.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/dd45b0438a315aed98b5830aa2fc43c5.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/c7cf0cd2fcd6efb0a33e063a8d82ff0e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b137d357e83f1634ae97beeb7390f6e7.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/ffdc425993df98b4a3d40d92dcc2a331.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/592f4d0933dc977245ef105e8a259b4f.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/ab5fafed3484610025812a001ca7a67e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/8ddd1959a2bef460a5149b3e0cf5e18a.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/35111049f3018537f75c238cb6febad4.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/ae9c3e4f65c0ac7efd2047d79b0e64f9.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/f650f979f3613c2f3f32570500350552.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/470f6627567c4a1cca31abf7617dfdca.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/1440cf82e580be651f7162bf6f44ff3e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/dcd9b642fec54a00a4cb310fd9775608.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/5fbcfb7258117e88cb73b45e25c88b01.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/ceee3cc941f48d37988de567ca10eca6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d719d1b09505d047ff77d1992d5341c1.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b6fca66574bfc4642d9ad279af5aa235.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/fae9c99bbb6ae827b508a97328551912.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/c2ecd547171fc923b5b32718a8e8780a.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/edba4e87b2ce983ee136723a809b0a0a.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/be7fa8a690d74035320a79944445e17c.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/0816434ded9aa9feb7b7f41fd4c15a60.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/a6ee015fe1bc4d86cdb9b7c76778e7a6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d8143d9ac2f959fa95987500ecc40242.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/32a51da6fd63d367f90d237a496837f5.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/f465c544093694268daf17e30a5c8112.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b705ae06953ab57080b289a6414a1702.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/76a48016ed81d0fa016d0fd5507792b0.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/374d84241878b54aa716bceefd66abd4.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/2d0f45e9a45eb0473566db0afbbdff08.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d3f083370c371a3ba1cddafaf193c27d.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/92ee7e4f3afdbe6a9a8c13a4a790baf1.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d2c51831aa2b59b93c7e56b29efbbcf6.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/eb73d1fc4b9c4f2fb0ed820f1fcc61c1.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/f3aa2afa43dc94eb79562be7a23ce876.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/97ae7fe956f2b5f316845fe7976fc4e0.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/1c3f14fba3dececc85d10d7252e68b93.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/dc877a47d3e62e46a455b27d3da3bcaa.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/22b0e9b250ae50b46645ea292786b647.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/7e8aa58fcd8e7b2280c2e8a3fbf8d799.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/49cc807f69d59746b6b04be3434e6637.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/3c02d26ad6d9aaf4d16ea905622d7352.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/7e1bf5816b995f1b4b09291e9168849c.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/0f618fba18c6d7decc8e677b9504de22.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/c9e6ee0ac5fe5a7d92a249ae751c506e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/94ea8b4a5e7e022a67079609d27f92b1.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/41e3e5ec9fb119b47ffd0d1e6fdb9496.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/f6172279b43501c70719b85bd75cf2fa.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/709c71461153419d86742071e16426c8.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/576554c542da76c08f0e80c129afcb0e.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/417f9093f56aa032be0355bfc29e8cff.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/bbbb0e0bdd0fcade424dcd7065e2c4dc.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/d070e505cdab4b27cb39bfe28eb63343.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b8759014d94329fdc2be9f8eac1df359.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/0db2bb3f8dcebb4279db97dc7608d090.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/e5470e89852c293a4320df21cb3bf7e9.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/531bdb172f66ee3500e344936f1f22bd.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/b7a4b3000d0c431fbce299986ac51c48.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/8e9b587a6f577478e9e6480235811f7d.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/aece583659ca803df09d3a0576ce8cd5.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/4cc406a032e2418daa5a768e3391820c.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/47dbda956c44d06fc1a4f8dbf1c77f00.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/32061f0904363502f73b77be7bb74eaf.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/3e6814b457a9087e0c46d5a949de2766.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/118cdb502af3929c505617d8e687e95c.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/e6d4821f6a554c7bc882a9fa75070dfe.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/106f80967620a3cb558658a5c474d819.png",
+  "https://lastfm.freetls.fastly.net/i/u/300x300/24546ab04aeb584825f465d8968301c4.png"
+];
+
+
+
+
 /**
- * Fetch and display top tracks with images
- * @param {number} [limit=10] - Optional. The number of unique tracks to fetch
+ * Display images from the imageUrl array
+ * @param {number} [limit=100] - Optional. The number of unique images to display
  */
-async function fetchAndDisplayTracks(limit = 10) {
+function displayImages(limit = 100) {
   try {
-    // Fetch preprocessed track data (with images) from the backend
-    const response = await fetch(`/api/lastfm/tracks?limit=${limit}`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
+    // Determine the actual number of images to display based on the limit and array length
+    const actualLimit = Math.min(limit, imageUrl.length / 2); // Divide by 2 because images are duplicated
 
-    const tracks = await response.json();
-    console.log('Tracks fetched from backend:', tracks);
+    const limitedImageUrls = imageUrl.slice(0, actualLimit);
 
-    // Display the fetched tracks on the page
+    // Select the container where images will be appended
     const backgroundContainer = document.querySelector('.background-images');
-    tracks.forEach((track) => {
-      if (track.imageURL !== 'No image available') {
-        const img = document.createElement('img');
-        img.src = track.imageURL;
-        img.alt = `Image for ${track.trackName} by ${track.artistName}`;
-        backgroundContainer.appendChild(img);
-      } else {
-        console.warn(`No image available for track: ${track.trackName} by ${track.artistName}`);
-      }
+
+    // Clear any existing images in the container (optional)
+    backgroundContainer.innerHTML = '';
+
+    // Iterate over the limitedImageUrls array and create image elements
+    limitedImageUrls.forEach((url, index) => {
+      // Create a div to wrap the img (optional, for styling purposes)
+      const div = document.createElement('div');
+      div.classList.add('image-wrapper'); // Add a class for potential CSS styling
+
+      // Create the img element
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = `Image ${index + 1} from Last.fm`;
+      img.loading = 'lazy'; // Enable lazy loading for performance
+
+      // Append the img to the div
+      div.appendChild(img);
+
+      // Append the div to the background container
+      backgroundContainer.appendChild(div);
     });
+
+    // Duplicate the images for seamless scrolling
+    limitedImageUrls.forEach((url, index) => {
+      const div = document.createElement('div');
+      div.classList.add('image-wrapper');
+
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = `Image Duplicate ${index + 1} from Last.fm`;
+      img.loading = 'lazy';
+
+      div.appendChild(img);
+      backgroundContainer.appendChild(div);
+    });
+
+    console.log(`${actualLimit * 2} images have been displayed (including duplicates).`);
   } catch (error) {
-    console.error('Error fetching and displaying tracks:', error);
+    console.error('Error displaying images:', error);
   }
 }
 
-// Initialize and call the function to fetch and display tracks
-fetchAndDisplayTracks(30);
+// Initialize and call the function to display images
+displayImages(200); // Display 50 unique images, resulting in 100 total (including duplicates)

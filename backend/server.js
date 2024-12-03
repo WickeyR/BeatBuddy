@@ -1,21 +1,17 @@
-// server.js
 const express = require('express');
 const OpenAI = require('openai'); // Your OpenAI integration
 const bodyParser = require('body-parser');
 const path = require('path');
-const fs = require('fs');
 const axios = require('axios');
 const bcrypt = require('bcryptjs');
 const app = express();
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const passport = require('passport');
 const SpotifyStrategy = require('passport-spotify').Strategy;
 const saltRounds = 10;
 const session = require('express-session');
-const {functionDefinitions, sanitizeMessages } = require('./openAIFunctions.js');
-
+const { functionDefinitions, sanitizeMessages } = require('./openAIFunctions.js');
 const SpotifyWebApi = require('spotify-web-api-node');
-
 
 const {
   getTrackInfo,
@@ -31,16 +27,6 @@ const {
   getChartTopTracks,
 } = require('./MusicFunctions');
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'your_default_secret', // Use a strong secret in production
-  resave: false, // Avoid resaving session if it hasn't changed
-  saveUninitialized: false, // Don't save uninitialized sessions
-  cookie: {
-    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-    httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
-    maxAge: 1000 * 60 * 60 * 24, // 1 day
-  },
-}));
 // Load environment variables
 require('dotenv').config();
 
@@ -48,7 +34,20 @@ require('dotenv').config();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
+// Session configuration
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'your_default_secret', // Use a strong secret in production
+    resave: false, // Avoid resaving session if it hasn't changed
+    saveUninitialized: false, // Don't save uninitialized sessions
+    cookie: {
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production (requires HTTPS)
+      httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      sameSite: 'lax', // Adjusted to allow cookies in popup
+    },
+  })
+);
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
@@ -60,76 +59,10 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'login.html'));
 });
 
-// -------------------- Last.fm API Proxy -------------------- //
-// Add to server.js
-
-// Endpoint to fetch detailed track info with images
-app.get('/api/lastfm/tracks', async (req, res) => {
-    const { limit = 10 } = req.query;
-    const uniqueArtists = new Set();
-    const chartingTracks = [];
-    let page = 1;
-  
-    try {
-      while (chartingTracks.length < limit) {
-        // Fetch the top tracks from Last.fm
-        const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
-          params: {
-            method: 'chart.getTopTracks',
-            api_key: process.env.LAST_FM_API_KEY,
-            limit: 50,
-            page,
-            format: 'json',
-          },
-        });
-  
-        const tracks = response.data.tracks?.track || [];
-        if (tracks.length === 0) break; // Stop if no tracks are returned
-  
-        for (const track of tracks) {
-          if (!uniqueArtists.has(track.artist.name)) {
-            uniqueArtists.add(track.artist.name);
-  
-            // Fetch detailed track info to get the album image
-            const trackDetailResponse = await axios.get('http://ws.audioscrobbler.com/2.0/', {
-              params: {
-                method: 'track.getInfo',
-                api_key: process.env.LAST_FM_API_KEY,
-                artist: track.artist.name,
-                track: track.name,
-                autocorrect: 1,
-                format: 'json',
-              },
-            });
-  
-            const trackInfo = trackDetailResponse.data.track;
-            const extraLargeImage = trackInfo.album?.image.find((img) => img.size === 'extralarge')?.['#text'];
-  
-            chartingTracks.push({
-              trackName: track.name,
-              artistName: track.artist.name,
-              imageURL: extraLargeImage || 'No image available',
-            });
-  
-            if (chartingTracks.length === limit) break; // Stop once we reach the limit
-          }
-        }
-  
-        page++; // Move to the next page
-      }
-  
-      // Return the charting tracks with images
-      res.json(chartingTracks);
-    } catch (error) {
-      console.error('Error fetching data from Last.fm:', error.message);
-      res.status(500).json({ error: 'Failed to fetch data from Last.fm' });
-    }
-  });
-
 //--------------------------Connect to mysql database-----------------//
 
-//Database information and password 
-const db = mysql.createConnection({
+// Database information and password
+const db = mysql.createPool({
   host: process.env.MYSQL_HOST,
   user: process.env.MYSQL_USER,
   password: process.env.MYSQL_PASSWORD,
@@ -137,20 +70,37 @@ const db = mysql.createConnection({
   port: process.env.MYSQL_PORT,
 });
 
-//Attempt connection to database 
-db.connect((err) => {
-  if (err) throw err;
-  console.log('Connected to MySQL database.');
+// Test database connection
+(async () => {
+  try {
+    const connection = await db.getConnection();
+    await connection.ping();
+    console.log('Connected to MySQL database.');
+    connection.release();
+  } catch (err) {
+    console.error('Error connecting to MySQL database:', err);
+    process.exit(1);
+  }
+})();
+
+// Serve login.html for the login page
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'login.html'));
+});
+
+// Serve signup.html for the signup page
+app.get('/signup', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'signup.html'));
 });
 
 //-------------------------- OpenAI API calls -----------------//
 
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
-
 app.post('/api/messageGPT', async (req, res) => {
   try {
     const { userInput, conversationId } = req.body;
+    const userId = req.session.userId;
 
     if (!conversationId) {
       return res.status(400).json({ success: false, error: 'Missing conversationId.' });
@@ -163,248 +113,228 @@ app.post('/api/messageGPT', async (req, res) => {
       WHERE conversation_id = ? 
       ORDER BY timestamp ASC
     `;
-    db.query(selectMessagesQuery, [conversationId], async (err, messages) => {
-      if (err) {
-        console.error('Error fetching conversation history:', err);
-        return res.status(500).json({ success: false, error: 'Error fetching conversation history.' });
-      }
+    const [messages] = await db.query(selectMessagesQuery, [conversationId]);
 
-      // Format conversation history for OpenAI
-      const conversationHistory = messages.map((msg) => ({
-        role: msg.sender === 'user' ? 'user' : 'assistant',
-        content: msg.message_content,
-      }));
+    // Build conversation history in the format required by OpenAI
+    const conversationHistory = messages.map((msg) => ({
+      role: msg.sender === 'user' ? 'user' : 'assistant',
+      content: msg.message_content,
+    }));
 
-      // Add the user's input to the conversation history
-      conversationHistory.push({ role: 'user', content: userInput });
+    // Fetch the user's genres
+    const selectGenresQuery = 'SELECT genre FROM user_genres WHERE user_id = ?';
+    const [genresResults] = await db.query(selectGenresQuery, [userId]);
+    const userGenres = genresResults.map((row) => row.genre);
 
-      // Define the system prompt and add it to the message chain
-      const systemPrompt = `
-  You are Beat Buddy, a music recommender. Guide the user and make playlists based on their inputs and suggestions.`;
+    // Include the genres in the system prompt
+    const systemPrompt = `You are Beat Buddy, a music recommender. Guide the user and make playlists based on their inputs and suggestions. The user is interested in the following genres: ${userGenres.join(', ')} remember that for later when they are lost on what music to chose.`;
+    const aiMessages = [
+      { role: 'system', content: systemPrompt },
+      ...conversationHistory,
+    ];
 
-      const aiMessages = [
-        { role: 'system', content: systemPrompt },
-        ...conversationHistory,
-      ];
+    // Sanitize messages before sending to OpenAI
+    const sanitizedMessages = sanitizeMessages(aiMessages);
 
-      // Sanitize messages before sending to OpenAI
-      const sanitizedMessages = sanitizeMessages(aiMessages);
-
-      try {
-        // Call OpenAI API
-        const completion = await openai.chat.completions.create({
-          model: 'gpt-4o-mini',
-          messages: sanitizedMessages,
-          functions: functionDefinitions,
-          function_call: 'auto',
-          max_tokens: 250,
-          temperature: 0.7,
-        });
-
-        const responseMessage = completion.choices[0].message;
-
-        // Check if the assistant wants to call a function
-        if (responseMessage.function_call) {
-          const functionName = responseMessage.function_call.name;
-          const functionArgs = JSON.parse(responseMessage.function_call.arguments);
-
-          // Execute the corresponding function
-          let functionResult;
-          switch (functionName) {
-            case 'searchTrack':
-              functionResult = await searchTrack(
-                functionArgs.songTitle,
-                functionArgs.limit || 5,
-                process.env.LAST_FM_API_KEY
-              );
-              break;
-            case 'getTrackInfo':
-              functionResult = await getTrackInfo(
-                functionArgs.artist,
-                functionArgs.songTitle,
-                process.env.LAST_FM_API_KEY
-              );
-              break;
-            case 'getAlbumInfo':
-              functionResult = await getAlbumInfo(
-                functionArgs.artist,
-                functionArgs.albumTitle,
-                process.env.LAST_FM_API_KEY
-              );
-              break;
-            case 'getRelatedTracks':
-              functionResult = await getRelatedTracks(
-                functionArgs.artist,
-                functionArgs.songTitle,
-                functionArgs.limit || 5,
-                process.env.LAST_FM_API_KEY
-              );
-              break;
-            case 'searchAlbum':
-              functionResult = await searchAlbum(
-                functionArgs.albumTitle,
-                functionArgs.limit || 5,
-                process.env.LAST_FM_API_KEY
-              );
-              break;
-            case 'getTagsTopTracks':
-              functionResult = await getTagsTopTracks(
-                functionArgs.tag,
-                functionArgs.limit || 5,
-                process.env.LAST_FM_API_KEY
-              );
-              break;
-            case 'getTagsTopArtists':
-              functionResult = await getTagsTopArtists(
-                functionArgs.tag,
-                functionArgs.limit || 5,
-                process.env.LAST_FM_API_KEY
-              );
-              break;
-            case 'getChartTopArtists':
-              functionResult = await getChartTopArtists(
-                functionArgs.limit || 5,
-                process.env.LAST_FM_API_KEY
-              );
-              break;
-            case 'getChartTopTags':
-              functionResult = await getChartTopTags(
-                functionArgs.limit || 5,
-                process.env.LAST_FM_API_KEY
-              );
-              break;
-            case 'getChartTopTracks':
-              functionResult = await getChartTopTracks(
-                functionArgs.limit || 5,
-                process.env.LAST_FM_API_KEY
-              );
-              break;
-          
-            case 'deleteFromPlaylist':
-              functionResult = await deleteFromPlaylist(
-                functionArgs.songTitle,
-                functionArgs.artist
-              );
-              break;
-            case 'printPlaylist':
-              functionResult = await printPlaylist();
-              break;
-            case 'createPlaylist':
-              functionResult = await createPlaylist(
-                functionArgs.playlistTitle,
-                conversationId
-              );
-              break;
-            case 'buildSuggestedGenrePlaylist':
-              functionResult = await buildSuggestedGenrePlaylist(
-                functionArgs.genre || null,
-                functionArgs.limit || 10
-              );
-              break;
-            case 'buildDatabasePlaylist':
-              functionResult = await buildDatabasePlaylist(
-                functionArgs.limit || 10,
-                conversationId
-              );
-              break;
-            case 'buildOnCurrentPlaylist':
-              functionResult = await buildOnCurrentPlaylist(
-                functionArgs.limit || 10
-              );
-              break;
-              case 'addToPlaylist':
-                  functionResult = await addToPlaylist(
-                    conversationId, // Pass the conversation ID here
-                    functionArgs.songTitle,
-                    functionArgs.artist
-                    );
-                    break;
-            default:
-              throw new Error(`Function ${functionName} is not implemented.`);
-          }
-
-          // Add the function's result to the conversation history
-          conversationHistory.push({
-            role: 'function',
-            name: functionName,
-            content: JSON.stringify(functionResult),
-          });
-
-          // Call the OpenAI API again with updated conversation history
-          const completion2 = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
-            messages: sanitizeMessages(conversationHistory),
-            max_tokens: 250,
-            temperature: 0.7,
-          });
-
-          const finalResponseMessage = completion2.choices[0].message.content;
-
-          // Save AI's response and function results in the database
-          const insertMessagesQuery = `
-            INSERT INTO messages (conversation_id, sender, message_content) 
-            VALUES (?, ?, ?), (?, ?, ?)
-          `;
-          db.query(
-            insertMessagesQuery,
-            [conversationId, 'user', userInput, conversationId, 'bot', finalResponseMessage],
-            (err) => {
-              if (err) {
-                console.error('Error saving messages:', err);
-                return res.status(500).json({ success: false, error: 'Error saving messages.' });
-              }
-
-              // Send the final response to the client
-              res.json({ success: true, response: finalResponseMessage });
-            }
-          );
-        } else {
-          // If no function call, handle as usual
-          const aiResponse = responseMessage.content;
-
-          // Save the user's and AI's messages in the database
-          const insertMessagesQuery = `
-            INSERT INTO messages (conversation_id, sender, message_content) 
-            VALUES (?, ?, ?), (?, ?, ?)
-          `;
-          db.query(
-            insertMessagesQuery,
-            [conversationId, 'user', userInput, conversationId, 'bot', aiResponse],
-            (err) => {
-              if (err) {
-                console.error('Error saving messages:', err);
-                return res.status(500).json({ success: false, error: 'Error saving messages.' });
-              }
-
-              // Send AI's response to the client
-              res.json({ success: true, response: aiResponse });
-            }
-          );
-        }
-      } catch (error) {
-        console.error('Error with OpenAI API:', error);
-        res.status(500).json({ success: false, error: 'Failed to generate response from OpenAI.' });
-      }
+    // Call OpenAI API
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: sanitizedMessages,
+      functions: functionDefinitions,
+      function_call: 'auto',
+      max_tokens: 250,
+      temperature: 0.7,
     });
+
+    const responseMessage = completion.choices[0].message;
+
+    // Check if the assistant wants to call a function
+    if (responseMessage.function_call) {
+      const functionName = responseMessage.function_call.name;
+      const functionArgs = JSON.parse(responseMessage.function_call.arguments);
+
+      // Execute the corresponding function
+      let functionResult;
+      switch (functionName) {
+        case 'searchTrack':
+          functionResult = await searchTrack(
+            functionArgs.songTitle,
+            functionArgs.limit || 5,
+            process.env.LAST_FM_API_KEY
+          );
+          break;
+        case 'getTrackInfo':
+          functionResult = await getTrackInfo(
+            functionArgs.artist,
+            functionArgs.songTitle,
+            process.env.LAST_FM_API_KEY
+          );
+          break;
+        case 'getAlbumInfo':
+          functionResult = await getAlbumInfo(
+            functionArgs.artist,
+            functionArgs.albumTitle,
+            process.env.LAST_FM_API_KEY
+          );
+          break;
+        case 'getRelatedTracks':
+          functionResult = await getRelatedTracks(
+            functionArgs.artist,
+            functionArgs.songTitle,
+            functionArgs.limit || 5,
+            process.env.LAST_FM_API_KEY
+          );
+          break;
+        case 'searchAlbum':
+          functionResult = await searchAlbum(
+            functionArgs.albumTitle,
+            functionArgs.limit || 5,
+            process.env.LAST_FM_API_KEY
+          );
+          break;
+        case 'getTagsTopTracks':
+          functionResult = await getTagsTopTracks(
+            functionArgs.tag,
+            functionArgs.limit || 5,
+            process.env.LAST_FM_API_KEY
+          );
+          break;
+        case 'getTagsTopArtists':
+          functionResult = await getTagsTopArtists(
+            functionArgs.tag,
+            functionArgs.limit || 5,
+            process.env.LAST_FM_API_KEY
+          );
+          break;
+        case 'getChartTopArtists':
+          functionResult = await getChartTopArtists(
+            functionArgs.limit || 5,
+            process.env.LAST_FM_API_KEY
+          );
+          break;
+        case 'getChartTopTags':
+          functionResult = await getChartTopTags(
+            functionArgs.limit || 5,
+            process.env.LAST_FM_API_KEY
+          );
+          break;
+        case 'getChartTopTracks':
+          functionResult = await getChartTopTracks(
+            functionArgs.limit || 5,
+            process.env.LAST_FM_API_KEY
+          );
+          break;
+        case 'deleteFromPlaylist':
+          functionResult = await deleteFromPlaylist(
+            functionArgs.songTitle,
+            functionArgs.artist
+          );
+          break;
+        case 'printPlaylist':
+          functionResult = await printPlaylist();
+          break;
+        case 'createPlaylist':
+          functionResult = await createPlaylist(
+            functionArgs.playlistTitle,
+            conversationId
+          );
+          break;
+        case 'buildSuggestedGenrePlaylist':
+          functionResult = await buildSuggestedGenrePlaylist(
+            functionArgs.genre || null,
+            functionArgs.limit || 10
+          );
+          break;
+        case 'buildDatabasePlaylist':
+          functionResult = await buildDatabasePlaylist(
+            functionArgs.limit || 10,
+            conversationId
+          );
+          break;
+        case 'buildOnCurrentPlaylist':
+          functionResult = await buildOnCurrentPlaylist(
+            functionArgs.limit || 10
+          );
+          break;
+        case 'addToPlaylist':
+          functionResult = await addToPlaylist(
+            conversationId, 
+            functionArgs.songTitle,
+            functionArgs.artist
+          );
+          break;
+        default:
+          throw new Error(`Function ${functionName} is not implemented.`);
+      }
+      // Add the function's result to the conversation history
+      conversationHistory.push({
+        role: 'function',
+        name: functionName,
+        content: JSON.stringify(functionResult),
+      });
+
+      // Call the OpenAI API again with updated conversation history
+      const completion2 = await openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: sanitizeMessages(conversationHistory),
+        max_tokens: 250,
+        temperature: 0.7,
+      });
+
+      const finalResponseMessage = completion2.choices[0].message.content;
+
+      // Save AI's response and function results in the database
+      const insertMessagesQuery = `
+        INSERT INTO messages (conversation_id, sender, message_content) 
+        VALUES (?, ?, ?), (?, ?, ?)
+      `;
+      await db.query(insertMessagesQuery, [
+        conversationId,
+        'user',
+        userInput,
+        conversationId,
+        'bot',
+        finalResponseMessage,
+      ]);
+
+      // Send the final response to the client
+      res.json({ success: true, response: finalResponseMessage });
+    } else {
+      // If no function call, handle as usual
+      const aiResponse = responseMessage.content;
+
+      // Save the user's and AI's messages in the database
+      const insertMessagesQuery = `
+        INSERT INTO messages (conversation_id, sender, message_content)
+        VALUES (?, ?, ?), (?, ?, ?)
+      `;
+      await db.query(insertMessagesQuery, [
+        conversationId,
+        'user',
+        userInput,
+        conversationId,
+        'bot',
+        aiResponse,
+      ]);
+
+      // Send AI's response to the client
+      res.json({ success: true, response: aiResponse });
+    }
   } catch (error) {
-    console.error('Unexpected server error:', error);
-    res.status(500).json({ success: false, error: 'Unexpected server error.' });
+    console.error('Error in /api/messageGPT:', error);
+    res.status(500).json({ success: false, error: 'Failed to generate response from OpenAI.' });
   }
 });
 
-
 // Get the playlist for a conversation
-app.get('/conversations/:conversationId/playlist', isAuthenticated, (req, res) => {
+app.get('/conversations/:conversationId/playlist', isAuthenticated, async (req, res) => {
   const conversationId = req.params.conversationId;
   const userId = req.session.userId;
 
-  // Verify that the conversation belongs to the user
-  const verifyQuery = 'SELECT * FROM conversations WHERE conversation_id = ? AND user_id = ?';
-  db.query(verifyQuery, [conversationId, userId], (err, results) => {
-    if (err) {
-      console.error('Error verifying conversation:', err);
-      return res.status(500).json({ error: 'Server error' });
-    }
+  try {
+    // Verify that the conversation belongs to the user
+    const verifyQuery = 'SELECT * FROM conversations WHERE conversation_id = ? AND user_id = ?';
+    const [results] = await db.query(verifyQuery, [conversationId, userId]);
 
     if (results.length === 0) {
       return res.status(403).json({ error: 'Unauthorized' });
@@ -412,31 +342,25 @@ app.get('/conversations/:conversationId/playlist', isAuthenticated, (req, res) =
 
     // Fetch the playlist for the conversation
     const selectPlaylistQuery = 'SELECT * FROM playlist WHERE conversation_id = ?';
-    db.query(selectPlaylistQuery, [conversationId], (err, playlistResults) => {
-      if (err) {
-        console.error('Error fetching playlist:', err);
-        return res.status(500).json({ error: 'Server error' });
-      }
+    const [playlistResults] = await db.query(selectPlaylistQuery, [conversationId]);
 
-      res.json(playlistResults);
-    });
-  });
+    res.json(playlistResults);
+  } catch (err) {
+    console.error('Error fetching playlist:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-//----------------- Playlist functions ---------------------------//
 // Delete a song from the playlist
-app.delete('/conversations/:conversationId/playlist/:songId', isAuthenticated, (req, res) => {
+app.delete('/conversations/:conversationId/playlist/:songId', isAuthenticated, async (req, res) => {
   const conversationId = req.params.conversationId;
   const songId = req.params.songId;
   const userId = req.session.userId;
 
-  // Verify that the conversation belongs to the user
-  const verifyQuery = 'SELECT * FROM conversations WHERE conversation_id = ? AND user_id = ?';
-  db.query(verifyQuery, [conversationId, userId], (err, results) => {
-    if (err) {
-      console.error('Error verifying conversation:', err);
-      return res.status(500).json({ error: 'Server error' });
-    }
+  try {
+    // Verify that the conversation belongs to the user
+    const verifyQuery = 'SELECT * FROM conversations WHERE conversation_id = ? AND user_id = ?';
+    const [results] = await db.query(verifyQuery, [conversationId, userId]);
 
     if (results.length === 0) {
       return res.status(403).json({ error: 'Unauthorized' });
@@ -444,18 +368,16 @@ app.delete('/conversations/:conversationId/playlist/:songId', isAuthenticated, (
 
     // Delete the song from the playlist
     const deleteQuery = 'DELETE FROM playlist WHERE id = ? AND conversation_id = ?';
-    db.query(deleteQuery, [songId, conversationId], (err, result) => {
-      if (err) {
-        console.error('Error deleting song from playlist:', err);
-        return res.status(500).json({ error: 'Server error' });
-      }
+    await db.query(deleteQuery, [songId, conversationId]);
 
-      res.json({ success: true, message: 'Song deleted from playlist.' });
-    });
-  });
+    res.json({ success: true, message: 'Song deleted from playlist.' });
+  } catch (err) {
+    console.error('Error deleting song from playlist:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-
+// Function to add to playlist
 async function addToPlaylist(conversation_id, songTitle, artist) {
   try {
     // Fetch track information from Last.fm API
@@ -474,9 +396,8 @@ async function addToPlaylist(conversation_id, songTitle, artist) {
     const trackInfo = response.data.track;
 
     // Extract the 'extralarge' image URL
-    const imageURL = trackInfo.album?.image.find(
-      (img) => img.size === 'extralarge'
-    )?.['#text'] || '';
+    const imageURL =
+      trackInfo.album?.image.find((img) => img.size === 'extralarge')?.['#text'] || '';
 
     // Prepare values for insertion
     const values = [
@@ -493,7 +414,7 @@ async function addToPlaylist(conversation_id, songTitle, artist) {
       VALUES (?, ?, ?, ?, ?)
     `;
 
-    await db.promise().query(insertQuery, values);
+    await db.query(insertQuery, values);
     console.log('Song added to playlist:', trackInfo.name);
 
     return { message: 'Song added to playlist successfully.' };
@@ -503,20 +424,15 @@ async function addToPlaylist(conversation_id, songTitle, artist) {
   }
 }
 
-
-
-//--------------------------User Login Functions -----------------//
+//--------------------------User Login and Signup Functions -----------------//
 
 // API endpoint to get user information
-app.get('/user', (req, res) => {
+app.get('/user', async (req, res) => {
   const userId = req.session.userId; // Retrieve the logged-in user's ID from the session
 
-  const query = 'SELECT username FROM users WHERE id = ?'; // Query to fetch the username using the user's ID
-  db.query(query, [userId], (err, results) => {
-    if (err) {
-      console.error('Database error:', err);
-      return res.status(500).json({ error: 'Server error' }); // Handle any server/database errors
-    }
+  try {
+    const query = 'SELECT username FROM users WHERE id = ?'; // Query to fetch the username using the user's ID
+    const [results] = await db.query(query, [userId]);
 
     if (results.length > 0) {
       const user = results[0];
@@ -524,165 +440,196 @@ app.get('/user', (req, res) => {
     } else {
       res.status(404).json({ error: 'User not found' }); // Handle the case where the user is not found
     }
-  });
+  } catch (err) {
+    console.error('Database error:', err);
+    return res.status(500).json({ error: 'Server error' }); // Handle any server/database errors
+  }
 });
 
+app.post('/signup', async (req, res) => {
+  const { username, password, genres = [] } = req.body;
 
+  console.log('Session ID at signup:', req.sessionID);
+  console.log('Session at signup:', req.session);
 
+  try {
+    // Check if username already exists
+    const selectQuery = 'SELECT * FROM users WHERE username = ?';
+    const [results] = await db.query(selectQuery, [username]);
 
-app.post('/login', (req, res) => {
-
-  //the form information
-  const {username, password} = req.body; 
-  
-  //Grab information from mysql database
-  const selectQuery  = 'SELECT * FROM users WHERE username = ?';
-
-  db.query(selectQuery, [username], (err,results) =>{
-    
-    //Handle potential error
-    if (err){
-      console.error("Error with database: ", err);
-      return res.status(500).send('Server error');
+    if (results.length > 0) {
+      return res.status(400).send('Username already exists');
     }
-    //Proceed with user authentication
-    if (results.length > 0){
+
+    // Hash the password
+    const hash = await bcrypt.hash(password, saltRounds);
+
+    // Insert into 'users' table
+    const insertUserQuery = `
+      INSERT INTO users (username, password)
+      VALUES (?, ?)
+    `;
+ 
+    const [userResult] = await db.query(insertUserQuery, [
+      username,
+      hash,
+      
+    ]);
+
+    const userId = userResult.insertId;
+
+    // Insert genres into 'user_genres' table
+    if (genres.length > 0) {
+      const insertGenresQuery = 'INSERT INTO user_genres (user_id, genre) VALUES ?';
+      const genreValues = genres.map((genre) => [userId, genre]);
+      await db.query(insertGenresQuery, [genreValues]);
+    }
+
+    // Set req.session.userId
+    req.session.userId = userId;
+
+ 
+    // Redirect to dashboard or send success response
+    res.redirect('/dashboard');
+  } catch (err) {
+    console.error('Error during signup:', err);
+    res.status(500).send('Server error during signup');
+  }
+});
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const selectQuery = 'SELECT * FROM users WHERE username = ?';
+    const [results] = await db.query(selectQuery, [username]);
+
+    if (results.length > 0) {
       const user = results[0];
+      const match = await bcrypt.compare(password, user.password);
 
-      //Compare the passwords
-      bcrypt.compare(password, user.password, (err, match) =>{
-        if(err){
-          console.error("Error with Bcrypt: ", err);
-          return res.status(500).send("Server error");
-        }
-        
-        //Passwords match
-        if(match){
-          req.session.userId = user.id;
-          res.redirect('/dashboard');
-        }
-        //Passwords do not match
-        else{
-          res.status(401).send("Invalid username or pasword");
-        }
-      });
+      if (match) {
+        req.session.userId = user.id;
+        res.redirect('/dashboard');
+      } else {
+        res.status(401).send('Invalid username or password');
+      }
     } else {
-      // User does not exist, create a new user
-      bcrypt.hash(password, saltRounds, (err, hash) => {
-        if (err) {
-          console.error('Bcrypt error:', err);
-          return res.status(500).send('Server error');
-        }
-
-        //Create a query to insert user information into the database 
-        const insertQuery = 'INSERT INTO users (username, password) VALUES (?, ?)';
-        db.query(insertQuery, [username, hash], (err, result) => {
-          if (err) {
-            console.error('Database error:', err);
-            return res.status(500).send('Server error');
-          }
-
-          // User created successfully, log them in
-          req.session.userId = result.insertId;
-          res.redirect('/dashboard');
-        });
-      });
+      res.status(401).send('Invalid username or password');
     }
-  });
+  } catch (err) {
+    console.error('Error during login:', err);
+    res.status(500).send('Server error');
+  }
 });
-
 
 // Create a new conversation
-app.post('/conversations', isAuthenticated, (req, res) => {
+app.post('/conversations', isAuthenticated, async (req, res) => {
   const userId = req.session.userId;
   const title = req.body.title || null;
 
-  const insertQuery = 'INSERT INTO conversations (user_id, title) VALUES (?, ?)';
-  db.query(insertQuery, [userId, title], (err, result) => {
-    if (err) {
-      console.error('Error creating conversation:', err);
-      return res.status(500).json({ error: 'Server error' });
-    }
+  try {
+    const insertQuery = 'INSERT INTO conversations (user_id, title) VALUES (?, ?)';
+    const [result] = await db.query(insertQuery, [userId, title]);
     res.json({ conversation_id: result.insertId });
-  });
+  } catch (err) {
+    console.error('Error creating conversation:', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Get all conversations for the user
-// Get all conversations for the user
-app.get('/conversations', isAuthenticated, (req, res) => {
+app.get('/conversations', isAuthenticated, async (req, res) => {
   const userId = req.session.userId;
 
-  const selectQuery = `
-    SELECT c.*
-    FROM conversations c
-    WHERE c.user_id = ? AND EXISTS (
-      SELECT 1 FROM messages m WHERE m.conversation_id = c.conversation_id
-    )
-    ORDER BY c.start_time DESC
-  `;
-  db.query(selectQuery, [userId], (err, results) => {
-    if (err) {
-      console.error('Error fetching conversations:', err);
-      return res.status(500).json({ error: 'Server error' });
-    }
-    res.json(results);
-  });
+  try {
+    const selectQuery = `
+      SELECT c.*, DATE_FORMAT(c.start_time, '%Y-%m-%dT%H:%i:%sZ') AS start_time_utc 
+      FROM conversations c 
+      WHERE c.user_id = ? 
+      ORDER BY c.start_time DESC;
+    `;
+    const [results] = await db.query(selectQuery, [userId]);
+
+    // Map the results to include the ISO-formatted 'start_time'
+    const conversations = results.map((conversation) => {
+      return {
+        ...conversation,
+        start_time: conversation.start_time_utc,
+      };
+    });
+
+    res.json(conversations);
+  } catch (err) {
+    console.error('Error fetching conversations:', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Get messages for a conversation
-app.get('/conversations/:conversationId/messages', isAuthenticated, (req, res) => {
-  const conversationId = req.params.conversationId;
-
-  const selectQuery = 'SELECT * FROM messages WHERE conversation_id = ? ORDER BY timestamp ASC';
-  db.query(selectQuery, [conversationId], (err, results) => {
-    if (err) {
-      console.error('Error fetching messages:', err);
-      return res.status(500).json({ error: 'Server error' });
-    }
-    res.json(results);
-  });
-  
-});
-
-function deleteConversation(conversationId) {
-  if (confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
-    fetch(`/conversations/${conversationId}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    })
-      .then(response => {
-        if (response.ok) {
-          // Remove the conversation from the UI
-          fetchChatHistory();
-
-          // If the deleted conversation is the current one, clear the chat window
-          if (conversationId == currentConversationId) {
-            currentConversationId = null;
-            document.getElementById('upperid').innerHTML = '';
-          }
-        } else {
-          console.error('Failed to delete conversation');
-        }
-      })
-      .catch(error => {
-        console.error('Error deleting conversation:', error);
-      });
-  }
-}
-
-
-// Delete a conversation
-app.delete('/conversations/:conversationId', isAuthenticated, (req, res) => {
+app.get('/conversations/:conversationId/messages', isAuthenticated, async (req, res) => {
   const conversationId = req.params.conversationId;
   const userId = req.session.userId;
 
-  // Verify that the conversation belongs to the user
-  const verifyQuery = 'SELECT * FROM conversations WHERE conversation_id = ? AND user_id = ?';
-  db.query(verifyQuery, [conversationId, userId], (err, results) => {
-    if (err) {
-      console.error('Error verifying conversation:', err);
-      return res.status(500).json({ error: 'Server error' });
+  try {
+    // Verify that the conversation belongs to the user
+    const verifyQuery = 'SELECT * FROM conversations WHERE conversation_id = ? AND user_id = ?';
+    const [results] = await db.query(verifyQuery, [conversationId, userId]);
+
+    if (results.length === 0) {
+      return res.status(403).json({ error: 'Unauthorized' });
     }
+
+    const selectQuery = 'SELECT * FROM messages WHERE conversation_id = ? ORDER BY timestamp ASC';
+    const [messages] = await db.query(selectQuery, [conversationId]);
+    res.json(messages);
+  } catch (err) {
+    console.error('Error fetching messages:', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Delete all conversations for the user
+app.delete('/conversations', isAuthenticated, async (req, res) => {
+  const userId = req.session.userId;
+
+  try {
+    // Delete messages associated with the user's conversations
+    const deleteMessagesQuery = `
+      DELETE m FROM messages m
+      INNER JOIN conversations c ON m.conversation_id = c.conversation_id
+      WHERE c.user_id = ?
+    `;
+    await db.query(deleteMessagesQuery, [userId]);
+
+    // Delete playlists associated with the user's conversations
+    const deletePlaylistsQuery = `
+      DELETE p FROM playlist p
+      INNER JOIN conversations c ON p.conversation_id = c.conversation_id
+      WHERE c.user_id = ?
+    `;
+    await db.query(deletePlaylistsQuery, [userId]);
+
+    // Delete the user's conversations
+    const deleteConversationsQuery = 'DELETE FROM conversations WHERE user_id = ?';
+    await db.query(deleteConversationsQuery, [userId]);
+
+    res.json({ success: true, message: 'All conversations deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting all conversations:', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Delete a conversation
+app.delete('/conversations/:conversationId', isAuthenticated, async (req, res) => {
+  const conversationId = req.params.conversationId;
+  const userId = req.session.userId;
+
+  try {
+    // Verify that the conversation belongs to the user
+    const verifyQuery = 'SELECT * FROM conversations WHERE conversation_id = ? AND user_id = ?';
+    const [results] = await db.query(verifyQuery, [conversationId, userId]);
 
     if (results.length === 0) {
       return res.status(403).json({ error: 'Unauthorized' });
@@ -690,120 +637,25 @@ app.delete('/conversations/:conversationId', isAuthenticated, (req, res) => {
 
     // Delete messages associated with the conversation
     const deleteMessagesQuery = 'DELETE FROM messages WHERE conversation_id = ?';
-    db.query(deleteMessagesQuery, [conversationId], (err) => {
-      if (err) {
-        console.error('Error deleting messages:', err);
-        return res.status(500).json({ error: 'Server error' });
-      }
+    await db.query(deleteMessagesQuery, [conversationId]);
 
-      // Delete the conversation
-      const deleteConversationQuery = 'DELETE FROM conversations WHERE conversation_id = ?';
-      db.query(deleteConversationQuery, [conversationId], (err) => {
-        if (err) {
-          console.error('Error deleting conversation:', err);
-          return res.status(500).json({ error: 'Server error' });
-        }
+    // Delete the conversation
+    const deleteConversationQuery = 'DELETE FROM conversations WHERE conversation_id = ?';
+    await db.query(deleteConversationQuery, [conversationId]);
 
-        res.json({ success: true, message: 'Conversation deleted successfully' });
-      });
-    });
-  });
+    res.json({ success: true, message: 'Conversation deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting conversation:', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
 });
-
-// Delete empty conversations for the user
-function deleteEmptyConversations(userId) {
-  return new Promise((resolve, reject) => {
-    const deleteQuery = `
-      DELETE c FROM conversations c
-      LEFT JOIN messages m ON c.conversation_id = m.conversation_id
-      WHERE c.user_id = ? AND m.conversation_id IS NULL
-    `;
-    db.query(deleteQuery, [userId], (err, result) => {
-      if (err) {
-        console.error('Error deleting empty conversations:', err);
-        return reject(err);
-      }
-      resolve();
-    });
-  });
-}
-// Send a message in a conversation
-app.post('/conversations/:conversationId/messages', isAuthenticated, async (req, res) => {
-  const conversationId = req.params.conversationId;
-  const { message_content } = req.body;
-  const userId = req.session.userId;
-
-  // Verify that the conversation belongs to the user
-  const verifyQuery = 'SELECT * FROM conversations WHERE conversation_id = ? AND user_id = ?';
-  db.query(verifyQuery, [conversationId, userId], async (err, results) => {
-    if (err) {
-      console.error('Error verifying conversation:', err);
-      return res.status(500).json({ error: 'Server error' });
-    }
-
-    if (results.length === 0) {
-      return res.status(403).json({ error: 'Unauthorized' });
-    }
-
-    // Insert user's message
-    const insertUserMessageQuery = 'INSERT INTO messages (conversation_id, sender, message_content) VALUES (?, ?, ?)';
-    db.query(insertUserMessageQuery, [conversationId, 'user', message_content], async (err, result) => {
-      if (err) {
-        console.error('Error inserting user message:', err);
-        return res.status(500).json({ error: 'Server error' });
-      }
-
-      // Retrieve conversation history for AI context
-      const selectMessagesQuery = 'SELECT sender, message_content FROM messages WHERE conversation_id = ? ORDER BY timestamp ASC';
-      db.query(selectMessagesQuery, [conversationId], async (err, messages) => {
-        if (err) {
-          console.error('Error fetching conversation history:', err);
-          return res.status(500).json({ error: 'Server error' });
-        }
-
-        // Format conversation history for AI
-        const conversationHistory = messages.map((msg) => ({
-          role: msg.sender === 'user' ? 'user' : 'assistant',
-          content: msg.message_content,
-        }));
-
-        try {
-          // Get AI response
-          const { response: aiResponse } = await messageGPT(message_content, conversationHistory, userId);
-
-          // Insert AI's message
-          const insertAIMessageQuery = 'INSERT INTO messages (conversation_id, sender, message_content) VALUES (?, ?, ?)';
-          db.query(insertAIMessageQuery, [conversationId, 'bot', aiResponse], (err, result) => {
-            if (err) {
-              console.error('Error inserting AI message:', err);
-              return res.status(500).json({ error: 'Server error' });
-            }
-
-            res.json({ output: aiResponse });
-          });
-        } catch (error) {
-          console.error('Error in OpenAI API:', error);
-          res.status(500).json({ error: 'Failed to generate response from OpenAI.' });
-        }
-      });
-    });
-  });
-});
-
-
-
-
-
-
-
 
 // Logout route
 app.post('/logout', (req, res) => {
   req.session.destroy();
   res.redirect('/');
 });
-  
-  
+
 // Middleware to check if user is authenticated
 function isAuthenticated(req, res, next) {
   if (req.session.userId) {
@@ -812,8 +664,8 @@ function isAuthenticated(req, res, next) {
     res.redirect('/');
   }
 }
-  //-----------------spotify connection ------------------------
-  
+
+//-----------------spotify connection ------------------------
 
 // Configure Spotify Strategy
 passport.use(
@@ -825,21 +677,18 @@ passport.use(
       passReqToCallback: true,
     },
     function (req, accessToken, refreshToken, expires_in, profile, done) {
-      const userId = req.session.userId;
       const expiresAt = new Date(Date.now() + expires_in * 1000);
 
-      const updateQuery = `
-        UPDATE users
-        SET spotify_access_token = ?, spotify_refresh_token = ?, spotify_token_expires = ?
-        WHERE id = ?
-      `;
-      db.query(updateQuery, [accessToken, refreshToken, expiresAt, userId], (err) => {
-        if (err) {
-          console.error('Error updating user with Spotify tokens:', err);
-          return done(err);
-        }
-        return done(null, profile);
-      });
+      // Store tokens in session
+      req.session.spotifyTokens = {
+        accessToken,
+        refreshToken,
+        expiresAt,
+      };
+      req.session.spotifyAuthenticated = true;
+
+      console.log('Spotify tokens stored in session:', req.session.spotifyTokens);
+      done(null, profile);
     }
   )
 );
@@ -854,13 +703,15 @@ passport.deserializeUser(function (obj, done) {
 });
 
 // Authentication routes
-app.get('/auth/spotify', passport.authenticate('spotify', {
-  scope: ['playlist-modify-public', 'playlist-modify-private'],
-}));
-
+app.get(
+  '/auth/spotify',
+  passport.authenticate('spotify', {
+    scope: ['playlist-modify-public', 'playlist-modify-private'],
+  })
+);
 app.get(
   '/auth/spotify/callback',
-  passport.authenticate('spotify', { failureRedirect: '/login' }),
+  passport.authenticate('spotify', { failureRedirect: '/signup' }),
   function (req, res) {
     // On success
     res.send(`
@@ -874,7 +725,7 @@ app.get(
               window.opener.postMessage('spotify-auth-success', '${req.protocol}://${req.get('host')}');
               window.close();
             } else {
-              window.location.href = '/dashboard';
+              window.location.href = '/signup';
             }
           </script>
           <p>Authentication successful! You can close this window.</p>
@@ -884,17 +735,16 @@ app.get(
   }
 );
 
-
-
 function getSpotifyApiForUser(userId) {
-  return new Promise((resolve, reject) => {
-    const query = `
-      SELECT spotify_access_token, spotify_refresh_token, spotify_token_expires
-      FROM users
-      WHERE id = ?
-    `;
-    db.query(query, [userId], async (err, results) => {
-      if (err) return reject(err);
+  return new Promise(async (resolve, reject) => {
+    try {
+      const query = `
+        SELECT spotify_access_token, spotify_refresh_token, spotify_token_expires
+        FROM users
+        WHERE id = ?
+      `;
+      const [results] = await db.query(query, [userId]);
+
       if (results.length === 0) return reject(new Error('User not found'));
 
       const user = results[0];
@@ -923,9 +773,7 @@ function getSpotifyApiForUser(userId) {
             SET spotify_access_token = ?, spotify_token_expires = ?
             WHERE id = ?
           `;
-          db.query(updateQuery, [newAccessToken, expiresAt, userId], (err) => {
-            if (err) return reject(err);
-          });
+          await db.query(updateQuery, [newAccessToken, expiresAt, userId]);
 
           spotifyApi.setAccessToken(newAccessToken);
         } catch (error) {
@@ -934,9 +782,12 @@ function getSpotifyApiForUser(userId) {
       }
 
       resolve(spotifyApi);
-    });
+    } catch (err) {
+      reject(err);
+    }
   });
 }
+
 app.post('/exportPlaylist', isAuthenticated, async (req, res) => {
   const userId = req.session.userId;
   const conversationId = req.body.conversationId;
@@ -951,7 +802,7 @@ app.post('/exportPlaylist', isAuthenticated, async (req, res) => {
 
     // Fetch the playlist from your database using promises
     const selectPlaylistQuery = 'SELECT * FROM playlist WHERE conversation_id = ?';
-    const [playlistResults] = await db.promise().query(selectPlaylistQuery, [conversationId]);
+    const [playlistResults] = await db.query(selectPlaylistQuery, [conversationId]);
 
     if (playlistResults.length === 0) {
       return res.status(400).json({ error: 'Playlist is empty' });
@@ -990,7 +841,9 @@ app.post('/exportPlaylist', isAuthenticated, async (req, res) => {
     }
 
     if (trackUris.length === 0) {
-      return res.status(400).json({ error: 'No tracks found on Spotify to add to the playlist' });
+      return res
+        .status(400)
+        .json({ error: 'No tracks found on Spotify to add to the playlist' });
     }
 
     // Add tracks to the playlist
@@ -1001,29 +854,28 @@ app.post('/exportPlaylist', isAuthenticated, async (req, res) => {
     // Include the playlist URL in the response
     const playlistUrl = createPlaylistData.body.external_urls.spotify;
 
-    res.json({ success: true, message: 'Playlist exported to Spotify successfully', playlistUrl });
+    res.json({
+      success: true,
+      message: 'Playlist exported to Spotify successfully',
+      playlistUrl,
+    });
   } catch (error) {
     console.error('Error exporting playlist to Spotify:', error);
     res.status(500).json({ error: 'Failed to export playlist to Spotify' });
   }
 });
 
-
 // Check if the user is connected to Spotify
-// Check if the user is connected to Spotify
-app.get('/spotify/status', isAuthenticated, (req, res) => {
+app.get('/spotify/status', isAuthenticated, async (req, res) => {
   const userId = req.session.userId;
 
-  const query = `
-    SELECT spotify_access_token, spotify_refresh_token
-    FROM users
-    WHERE id = ?
-  `;
-  db.query(query, [userId], (err, results) => {
-    if (err) {
-      console.error('Error checking Spotify connection status:', err);
-      return res.status(500).json({ error: 'Server error' });
-    }
+  try {
+    const query = `
+      SELECT spotify_access_token, spotify_refresh_token
+      FROM users
+      WHERE id = ?
+    `;
+    const [results] = await db.query(query, [userId]);
 
     if (results.length > 0) {
       const user = results[0];
@@ -1032,24 +884,82 @@ app.get('/spotify/status', isAuthenticated, (req, res) => {
     } else {
       res.status(404).json({ error: 'User not found' });
     }
-  });
+  } catch (err) {
+    console.error('Error checking Spotify connection status:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-
-
-
-
-
-  // Dashboard route (protected)
-app.get('/dashboard', (req, res) => {
-    // Resets playlist data when the user logs in
-    // initializeDataFiles();
-    res.sendFile(path.join(__dirname, '..', 'public', 'chatApplication.html'));
-  });
-
-
+// Dashboard route (protected)
+app.get('/dashboard', isAuthenticated, (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'chatApplication.html'));
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}`);
+});
+
+//------------------------- lastfm  proxy--------------------------------
+app.get('/api/lastfm/tracks', async (req, res) => {
+  const { limit = 10 } = req.query;
+  const uniqueArtists = new Set();
+  const chartingTracks = [];
+  let page = 1;
+
+  try {
+    while (chartingTracks.length < limit) {
+      // Fetch the top tracks from Last.fm
+      const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+        params: {
+          method: 'chart.getTopTracks',
+          api_key: process.env.LAST_FM_API_KEY,
+          limit: 50,
+          page,
+          format: 'json',
+        },
+      });
+
+      const tracks = response.data.tracks?.track || [];
+      if (tracks.length === 0) break; // Stop if no tracks are returned
+
+      for (const track of tracks) {
+        if (!uniqueArtists.has(track.artist.name)) {
+          uniqueArtists.add(track.artist.name);
+
+          // Fetch detailed track info to get the album image
+          const trackDetailResponse = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+            params: {
+              method: 'track.getInfo',
+              api_key: process.env.LAST_FM_API_KEY,
+              artist: track.artist.name,
+              track: track.name,
+              autocorrect: 1,
+              format: 'json',
+            },
+          });
+
+          const trackInfo = trackDetailResponse.data.track;
+          const extraLargeImage =
+            trackInfo.album?.image.find((img) => img.size === 'extralarge')?.['#text'];
+
+          chartingTracks.push({
+            trackName: track.name,
+            artistName: track.artist.name,
+            imageURL: extraLargeImage || 'No image available',
+          });
+
+          if (chartingTracks.length === limit) break; // Stop once we reach the limit
+        }
+      }
+
+      page++; // Move to the next page
+    }
+
+    // Return the charting tracks with images
+    res.json(chartingTracks);
+  } catch (error) {
+    console.error('Error fetching data from Last.fm:', error.message);
+    res.status(500).json({ error: 'Failed to fetch data from Last.fm' });
+  }
 });

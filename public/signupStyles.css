@@ -1,0 +1,225 @@
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: white;
+}
+
+.SignUp {
+    width: 100%;
+    height: 100vh;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-image {
+    display: block;
+    margin: 0 auto 20px;
+    width: 80px;
+    height: auto; /* Maintain aspect ratio */
+}
+
+.Content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+    text-align: center;
+}
+
+.Frame245 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.sign-up-header {
+    color: #333333;
+    font-size: 32px;
+    font-weight: 500;
+}
+
+.Frame254 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+
+.BasicInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.TextField {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.Label {
+    color: #666666;
+    font-size: 16px;
+}
+
+.Input {
+    width: 578px;
+    height: 56px;
+    border: 1px solid rgba(102, 102, 102, 0.35);
+    border-radius: 12px;
+    padding: 0 24px;
+    font-size: 16px;
+}
+
+.PasswordContainer {
+    position: relative;
+}
+
+.PasswordHideSee {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(102, 102, 102, 0.80);
+    cursor: pointer;
+}
+
+.ErrorMessage {
+    color: #666666;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+/* GenreSelection */
+.GenreSelection {
+    text-align: center;
+    width: 578px;
+}
+
+.Label {
+    margin-bottom: 8px;
+    font-size: 16px;
+    color: #666666;
+}
+
+.CheckboxContainer {
+    position: relative;
+    width: 100%;
+    max-height: 180px; /* Set max height for the container */
+    border: 1px solid rgba(102, 102, 102, 0.35);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+}
+
+.ScrollableCheckboxes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Two columns for genres */
+    gap: 8px;
+    max-height: 150px; /* Adjust to leave padding */
+    overflow-y: scroll; /* Enable vertical scrolling */
+    padding: 8px;
+    width: 100%;
+}
+
+/* Hide the scroll bar */
+.ScrollableCheckboxes::-webkit-scrollbar {
+    display: none; /* Hide the scrollbar */
+}
+.ScrollableCheckboxes {
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox */
+}
+
+.CustomCheckbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    color: #666666;
+    cursor: pointer;
+    position: relative;
+    padding: 8px;
+    border: 1px solid rgba(102, 102, 102, 0.35);
+    border-radius: 8px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.CustomCheckbox input {
+    display: none; /* Hide the default checkbox */
+}
+
+.CustomCheckbox span {
+    color: #333333;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.CustomCheckbox:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: #1DB954;
+}
+
+.CustomCheckbox input:checked + span {
+    color: #1DB954; /* Highlight text when checked */
+    font-weight: bold;
+}
+
+.Frame248 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.Button {
+    width: 578px;
+    height: 64px;
+    background: #111111;
+    border-radius: 40px;
+    color: white;
+    font-size: 22px;
+    font-weight: 500;
+    opacity: 0.25;
+    cursor: not-allowed;
+    border: none;
+}
+
+.Button:enabled {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.HaveAnAccountLogin {
+    font-size: 16px;
+    color: #333333;
+}
+
+.LoginLink {
+    color: #111111;
+    text-decoration: underline;
+    margin-left: 5px;
+}
+
+.SpotifyButton {
+    width: 578px;
+    height: 56px;
+    background: #1DB954;
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.SpotifyButton:hover {
+    background: #1AA34A;
+} 

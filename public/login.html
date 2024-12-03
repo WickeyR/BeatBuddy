@@ -1,19 +1,31 @@
+<!DOCTYPE html>
 <html>
 <head>
   <title>Login Page</title>
   <link rel="stylesheet" href="loginStyles.css" />
-  <!-- Axios CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
   <div class="background-images"></div> <!-- Container for background images -->
-  <div class="overlay">
-    <h2>Login</h2>
-    <form id="login-form" action="/login" method="POST">
-      <input type="text" name="username" placeholder="Username" required /><br /><br />
-      <input type="password" name="password" placeholder="Password" required /><br /><br />
-      <button type="submit">Login</button>
-    </form>
+  <div class="login-page">
+    <div class="overlay">
+      <div class="form-container">
+        <img src="images/BeatBuddyIcon.png" alt="BeatBuddy Icon" class="icon-image" />
+        <h2 class="form-title">Sign in</h2>
+        <form id="login-form" action="/login" method="POST">
+          <div class="input-container">
+            <label for="username" class="input-label">Username</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required />
+          </div>
+          <div class="input-container">
+            <label for="password" class="input-label">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required />
+          </div>
+          <button type="submit" class="submit-button">Sign in</button>
+        </form>
+        <div class="login-prompt">
+          <span>Don't have an account? </span><a href="/signup" class="login-link">Sign up</a>        </div>
+      </div>
+    </div>
   </div>
   <script src="loginScript.js"></script>
 </body>
