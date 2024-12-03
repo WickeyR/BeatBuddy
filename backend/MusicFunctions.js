@@ -129,7 +129,6 @@ async function getTrackInfo(artist, songTitle, api_key) {
 async function getRelatedTracks(artist, songTitle, limit = 5, api_key) {
   console.log('getRelatedTracks called');
 
-  // Attempt to get a response from Last.fm with provided parameters
   try {
     const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
       params: {
@@ -143,28 +142,29 @@ async function getRelatedTracks(artist, songTitle, limit = 5, api_key) {
       },
     });
 
-    // Access the array of related tracks safely
     const relatedTracks = response.data.similartracks
       ? response.data.similartracks.track
       : [];
 
     let formattedTracks = [];
 
-    // Loop through each related track and format it
     for (const track of relatedTracks) {
-      const formattedTrack = formatInformation(track, 'track');
+      const formattedTrack = {
+        songTitle: track.name || '',
+        artist: track.artist?.name || '',
+        imageURL:
+          track.image?.find((img) => img.size === 'extralarge')?.['#text'] || '',
+      };
       formattedTracks.push(formattedTrack);
     }
 
-    // Returns the formatted list of similar tracks
     return formattedTracks;
   } catch (error) {
     console.error('Error fetching data from Last.fm', error);
-
-    // Rethrow the error so it can be caught in server.js
     throw error;
   }
 }
+
 
 /**
  * searchTrack: Returns a formatted list of tracks with the name of songTitle

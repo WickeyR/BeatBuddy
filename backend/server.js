@@ -44,10 +44,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true,        // Must be true if sameSite is 'none'
+      secure: false,        // Must be true if sameSite is 'none'
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24, // 1 day
-      sameSite: 'none',    // Necessary for OAuth flows
+      sameSite: 'lax',    // none for deployment, lax for development
     },
   })
 );
@@ -447,12 +447,15 @@ async function addToPlaylist(conversation_id, songTitle, artist) {
     await db.query(insertQuery, values);
     console.log('Song added to playlist:', trackInfo.name);
 
+    // Optionally, you can fetch and store suggested tracks here if needed
+
     return { message: 'Song added to playlist successfully.' };
   } catch (error) {
     console.error('Error adding song to playlist:', error);
     throw error;
   }
 }
+
 
 //--------------------------User Login and Signup Functions -----------------//
 
@@ -994,5 +997,83 @@ app.get('/api/lastfm/tracks', async (req, res) => {
   } catch (error) {
     console.error('Error fetching data from Last.fm:', error.message);
     res.status(500).json({ error: 'Failed to fetch data from Last.fm' });
+  }
+});
+
+
+//-------------- playlist functions ---------------
+// Get suggested songs for a conversation
+app.get('/conversations/:conversationId/suggestions', isAuthenticated, async (req, res) => {
+  const conversationId = req.params.conversationId;
+  const userId = req.session.userId;
+
+  try {
+    // Verify that the conversation belongs to the user
+    const verifyQuery = 'SELECT * FROM conversations WHERE conversation_id = ? AND user_id = ?';
+    const [results] = await db.query(verifyQuery, [conversationId, userId]);
+
+    if (results.length === 0) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    // Fetch the playlist for the conversation
+    const selectPlaylistQuery = 'SELECT * FROM playlist WHERE conversation_id = ?';
+    const [playlistResults] = await db.query(selectPlaylistQuery, [conversationId]);
+
+    if (playlistResults.length === 0) {
+      return res.json([]); // No songs in playlist, return empty suggestions
+    }
+
+    const maxSuggestions = 5;
+    let suggestions = [];
+    const seenTracks = new Set();
+    const playlistTrackIds = new Set(playlistResults.map(song => song.song_title + ' - ' + song.song_artist));
+
+    for (const song of playlistResults) {
+      if (suggestions.length >= maxSuggestions) break;
+
+      const similarTracks = await getRelatedTracks(song.song_artist, song.song_title, maxSuggestions, process.env.LAST_FM_API_KEY);
+
+      for (const similar of similarTracks) {
+        const trackId = similar.songTitle + ' - ' + similar.artist;
+        if (!playlistTrackIds.has(trackId) && !seenTracks.has(trackId)) {
+          seenTracks.add(trackId);
+          suggestions.push(similar);
+        }
+        if (suggestions.length >= maxSuggestions) break;
+      }
+      if (suggestions.length >= maxSuggestions) break;
+    }
+
+    res.json(suggestions.slice(0, maxSuggestions));
+
+  } catch (err) {
+    console.error('Error fetching suggestions:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Add a song to the playlist (from suggestions)
+app.post('/conversations/:conversationId/playlist', isAuthenticated, async (req, res) => {
+  const conversationId = req.params.conversationId;
+  const userId = req.session.userId;
+  const { songTitle, artist } = req.body;
+
+  try {
+    // Verify that the conversation belongs to the user
+    const verifyQuery = 'SELECT * FROM conversations WHERE conversation_id = ? AND user_id = ?';
+    const [results] = await db.query(verifyQuery, [conversationId, userId]);
+
+    if (results.length === 0) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    // Add song to the playlist
+    await addToPlaylist(conversationId, songTitle, artist);
+
+    res.json({ success: true, message: 'Song added to playlist' });
+  } catch (err) {
+    console.error('Error adding song to playlist:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });

@@ -306,6 +306,41 @@ nav {
     height: 20px;
 }
 
+
+
+
+
+/* Suggestion Items */
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background-color: #282828;
+}
+
+.add-button {
+    background-color: #1DB954;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: auto;
+}
+
+.add-button:hover {
+    background-color: #1ed760;
+}
+
+
+
+
 /* 7. Main Chat Box */
 .box {
     display: flex;

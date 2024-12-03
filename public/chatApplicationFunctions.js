@@ -186,7 +186,7 @@ function deleteConversation(conversationId) {
 function fetchPlaylist() {
   if (!currentConversationId) return;
 
-  fetch(`/conversations/${currentConversationId}/playlist`, { // Added quotes
+  fetch(`/conversations/${currentConversationId}/playlist`, {
     credentials: 'include',
   })
     .then((response) => {
@@ -197,11 +197,13 @@ function fetchPlaylist() {
     })
     .then((playlist) => {
       renderPlaylist(playlist);
+      fetchSuggestions(); // Fetch suggestions after updating playlist
     })
     .catch((error) => {
       console.error('Error fetching playlist:', error);
     });
 }
+
 
 // Render playlist in the UI
 function renderPlaylist(playlist) {
@@ -215,8 +217,8 @@ function renderPlaylist(playlist) {
 
     // Image element
     const img = document.createElement('img');
-    img.src = song.song_large_image_url || 'default-image-url.jpg'; // Default image if none available
-    img.alt = `${song.song_title} Album Art`; // Fixed template literal
+    img.src = song.song_large_image_url || 'images/BeatBuddyIcon.png'; // Default image if none available
+    img.alt = `${song.song_title} Album Art`;
     img.className = 'song-image';
 
     // Song details container
@@ -237,14 +239,10 @@ function renderPlaylist(playlist) {
     songDetails.appendChild(songTitle);
     songDetails.appendChild(songArtist);
 
-    // Delete button (optional)
+    // Delete button
     const deleteButton = document.createElement('button');
     deleteButton.className = 'delete-button';
-    deleteButton.innerHTML = `
-      <svg class="delete-icon" viewBox="0 0 24 24">
-        <path fill="currentColor" d="M9 3v1H4v2h16V4h-5V3H9zm1 5v10h2V8h-2zm4 0v10h2V8h-2z"></path>
-      </svg>
-    `; // Used backticks for multi-line HTML
+    deleteButton.innerHTML = '&times;';
     deleteButton.dataset.songId = song.id;
     deleteButton.addEventListener('click', function () {
       deleteSongFromPlaylist(song.id);
@@ -259,6 +257,7 @@ function renderPlaylist(playlist) {
     playlistList.appendChild(li);
   });
 }
+
 
 // Create a new conversation
 function createNewConversation() {
@@ -399,14 +398,15 @@ async function sendMessage() {
 function deleteSongFromPlaylist(songId) {
   if (!currentConversationId) return;
 
-  fetch(`/conversations/${currentConversationId}/playlist/${songId}`, { // Added quotes
+  fetch(`/conversations/${currentConversationId}/playlist/${songId}`, {
     method: 'DELETE',
     credentials: 'include',
   })
     .then((response) => {
       if (response.ok) {
-        // Refresh the playlist
+        // Refresh the playlist and suggestions
         fetchPlaylist();
+        fetchSuggestions();
       } else {
         console.error('Failed to delete song from playlist');
       }
@@ -415,6 +415,7 @@ function deleteSongFromPlaylist(songId) {
       console.error('Error deleting song from playlist:', error);
     });
 }
+
 
 // Scroll to bottom function
 function scroll() {
@@ -459,7 +460,6 @@ function connectToSpotify() {
   window.addEventListener('message', handleMessage, false);
 }
 
-// Example usage in exportPlaylist
 function exportPlaylist() {
   if (!currentConversationId) return;
 
@@ -481,15 +481,8 @@ function exportPlaylist() {
     })
     .then((data) => {
       if (data.success) {
-        // Show custom notification
-        showNotification('Playlist exported to Spotify successfully!');
-
-        // Open the playlist URL in a new tab
-        if (data.playlistUrl) {
-          window.open(data.playlistUrl, '_blank');
-        }
-        // Reload the dashboard page
-        window.location.reload();
+        // Show the modal with the success message and link
+        showPopup(data.playlistUrl);
       } else {
         throw new Error(data.error || 'Failed to export playlist');
       }
@@ -499,6 +492,132 @@ function exportPlaylist() {
       showNotification('Failed to export playlist: ' + error.message, 'error');
     });
 }
+
+
+
+
+// Fetch suggestions for the current conversation
+function fetchSuggestions() {
+  if (!currentConversationId) return;
+
+  fetch(`/conversations/${currentConversationId}/suggestions`, {
+    credentials: 'include',
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch suggestions');
+      }
+      return response.json();
+    })
+    .then((suggestions) => {
+      renderSuggestions(suggestions);
+    })
+    .catch((error) => {
+      console.error('Error fetching suggestions:', error);
+    });
+}
+
+// Render suggestions in the UI
+function renderSuggestions(suggestions) {
+  const suggestionsList = document.getElementById('suggestions-list');
+  suggestionsList.innerHTML = ''; // Clear existing items
+
+  suggestions.forEach((song) => {
+    // Create suggestion item container
+    const li = document.createElement('li');
+    li.className = 'suggestion-item';
+
+    // Image element
+    const img = document.createElement('img');
+    img.src = song.imageURL || 'default-image-url.jpg'; // Default image if none available
+    img.alt = `${song.songTitle} Album Art`;
+    img.className = 'song-image';
+
+    // Song details container
+    const songDetails = document.createElement('div');
+    songDetails.className = 'song-details';
+
+    // Song title
+    const songTitle = document.createElement('div');
+    songTitle.className = 'song-title';
+    songTitle.textContent = song.songTitle;
+
+    // Song artist
+    const songArtist = document.createElement('div');
+    songArtist.className = 'song-artist';
+    songArtist.textContent = song.artist;
+
+    // Append title and artist to details
+    songDetails.appendChild(songTitle);
+    songDetails.appendChild(songArtist);
+
+    // Add button
+    const addButton = document.createElement('button');
+    addButton.className = 'add-button';
+    addButton.textContent = 'Add';
+    addButton.addEventListener('click', function () {
+      addSongToPlaylistFromSuggestion(song);
+    });
+
+    // Assemble the suggestion item
+    li.appendChild(img);
+    li.appendChild(songDetails);
+    li.appendChild(addButton);
+
+    // Append to suggestions list
+    suggestionsList.appendChild(li);
+  });
+}
+
+function showPopup(playlistUrl) {
+  const popupContainer = document.getElementById('popup-container');
+  const popupMessage = document.getElementById('popup-message');
+  const popupLink = document.getElementById('popup-link');
+
+  // Set the message and link
+  popupMessage.textContent = 'Playlist exported to Spotify successfully!';
+  popupLink.href = playlistUrl;
+
+  // Show the popup
+  popupContainer.classList.remove('hidden');
+}
+
+// Close the popup using the close button
+document.getElementById('popup-close-left-button').addEventListener('click', () => {
+  document.getElementById('popup-container').classList.add('hidden');
+});
+
+// Function to add song to playlist from suggestion
+function addSongToPlaylistFromSuggestion(song) {
+  if (!currentConversationId) return;
+
+  fetch(`/conversations/${currentConversationId}/playlist`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      songTitle: song.songTitle,
+      artist: song.artist,
+    }),
+    credentials: 'include',
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Failed to add song to playlist');
+      }
+      return response.json();
+    })
+    .then((data) => {
+      // Refresh the playlist and suggestions
+      fetchPlaylist();
+      fetchSuggestions();
+    })
+    .catch((error) => {
+      console.error('Error adding song to playlist:', error);
+    });
+}
+
 
 function checkSpotifyConnection() {
   fetch('/spotify/status', {
