@@ -44,14 +44,13 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true, // Set to false during development
+      secure: true,        // Must be true if sameSite is 'none'
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24, // 1 day
-      sameSite: 'lax', // Should work for OAuth flows
+      sameSite: 'none',    // Necessary for OAuth flows
     },
   })
 );
-
 app.use(passport.initialize());
 app.use(passport.session());
 
