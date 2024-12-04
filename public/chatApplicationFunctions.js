@@ -19,11 +19,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('popup-container').classList.add('hidden');
   });
 
-  // Attach event listeners
   document.getElementById('new-chat-button').addEventListener('click', function () {
     createNewConversation();
     fetchChatHistory();
     fetchPlaylist();
+  });
+  
+  // Add event listener for 'Delete All Chats' button
+  document.getElementById('delete-all-chats-button').addEventListener('click', function () {
+    deleteAllConversations();
   });
 
   // Event listener for message form submission
@@ -516,7 +520,6 @@ function fetchSuggestions() {
       console.error('Error fetching suggestions:', error);
     });
 }
-
 // Render suggestions in the UI
 function renderSuggestions(suggestions) {
   const suggestionsList = document.getElementById('suggestions-list');
@@ -529,7 +532,7 @@ function renderSuggestions(suggestions) {
 
     // Image element
     const img = document.createElement('img');
-    img.src = song.imageURL || 'default-image-url.jpg'; // Default image if none available
+    img.src = song.imageURL || 'images/BeatBuddyIcon.png'; // Use large image URL or default
     img.alt = `${song.songTitle} Album Art`;
     img.className = 'song-image';
 

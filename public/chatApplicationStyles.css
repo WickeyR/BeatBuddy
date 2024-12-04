@@ -76,7 +76,62 @@ nav {
     overflow-y: auto;
     transition: transform 0.3s ease-in-out;
 }
+.chat-history-footer {
+    padding: 10px;
+}
 
+#delete-all-chats-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #343541;
+    color: #d1d5db;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center the button text */
+    gap: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#delete-all-chats-button:hover {
+    background-color: #454654;
+}
+
+.chat-history-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.chat-history-item:hover {
+    background-color: #343541;
+}
+
+.chat-history-item-button {
+    flex-grow: 1;
+    text-align: left;
+    background-color: transparent;
+    color: #d1d5db;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-history-delete-button {
+    background: none;
+    border: none;
+    color: #d1d5db;
+    font-size: 16px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.chat-history-delete-button:hover {
+    color: #fff;
+}
 .chat-history.visible {
     transform: translateX(0);
 }

@@ -44,10 +44,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true,        // Must be true if sameSite is 'none'
+      secure: false,        // Must be true if sameSite is 'none'
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24, // 1 day
-      sameSite: 'none',    // none for deployment, lax for development
+      sameSite: 'lax',    // none for deployment, lax for development
     },
   })
 );
@@ -135,6 +135,25 @@ app.post('/api/messageGPT', async (req, res) => {
       content: msg.message_content,
     }));
 
+    
+
+     // **Fetch the current playlist for the conversation**
+     const selectPlaylistQuery = 'SELECT song_title, song_artist FROM playlist WHERE conversation_id = ?';
+     const [playlistResults] = await db.query(selectPlaylistQuery, [conversationId]);
+
+     // Build the playlist text
+    let playlistText = '';
+    if (playlistResults.length > 0) {
+      // Limit the number of songs to manage token usage
+      const maxSongsToInclude = 10; // Adjust as needed
+      const songsToInclude = playlistResults.slice(-maxSongsToInclude);
+      playlistText = songsToInclude
+        .map((song, index) => `${index + 1}. "${song.song_title}" by ${song.song_artist}`)
+        .join('\n');
+    } else {
+      playlistText = 'The playlist is currently empty.';
+    }
+
     // **Add the user's input to the conversation history**
     conversationHistory.push({ role: 'user', content: userInput });
 
@@ -147,7 +166,24 @@ app.post('/api/messageGPT', async (req, res) => {
 
     // Define the system prompt and add it to the message chain
     const systemPrompt = `
-You are Beat Buddy, a music recommender. Guide the user and make playlists based on their inputs and suggestions.`;
+You are Beat Buddy, a music recommender. Guide the user and make playlists based on their inputs and suggestions.
+
+Current playlist:
+${playlistText}
+
+User prefered genres:
+${userGenres}
+
+When making recommendations, avoid suggesting songs that are already in the playlist.
+When the user is unsure on what to listen to, suggest songs based on their favorite genres or ask for their current mood.
+
+**Formatting Instructions:**
+- When listing songs, please format them as a numbered list with a seperate line for each.
+- Each song should be on a new line.
+- Include the song title and artist in the format: "Song Title" by Artist.
+- When returning song information, only list the song title and aritst unless asked.
+- Use markdown formatting if possible.
+`;
 
     const aiMessages = [
       { role: 'system', content: systemPrompt },

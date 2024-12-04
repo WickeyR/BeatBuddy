@@ -149,13 +149,49 @@ async function getRelatedTracks(artist, songTitle, limit = 5, api_key) {
     let formattedTracks = [];
 
     for (const track of relatedTracks) {
-      const formattedTrack = {
-        songTitle: track.name || '',
-        artist: track.artist?.name || '',
-        imageURL:
-          track.image?.find((img) => img.size === 'extralarge')?.['#text'] || '',
-      };
-      formattedTracks.push(formattedTrack);
+      try {
+        // Fetch track information to get the large image URL
+        const trackInfoResponse = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+          params: {
+            method: 'track.getInfo',
+            api_key: api_key,
+            artist: track.artist.name,
+            track: track.name,
+            autocorrect: 1,
+            format: 'json',
+          },
+        });
+
+        const trackInfo = trackInfoResponse.data.track;
+
+        const imageURL =
+          trackInfo.album?.image.find((img) => img.size === 'extralarge')?.['#text'] || '';
+
+        const formattedTrack = {
+          songTitle: trackInfo.name || '',
+          artist: trackInfo.artist?.name || '',
+          imageURL: imageURL,
+        };
+
+        formattedTracks.push(formattedTrack);
+      } catch (err) {
+        console.error('Error fetching track info for', track.name, err);
+
+        // Fallback to the image from 'track.getSimilar' response
+        let imageURL = track.image?.find((img) => img.size === 'extralarge')?.['#text'];
+        if (!imageURL) {
+          imageURL = track.image?.find((img) => img.size === 'large')?.['#text'];
+        }
+        imageURL = imageURL || '';
+
+        const formattedTrack = {
+          songTitle: track.name || '',
+          artist: track.artist?.name || '',
+          imageURL: imageURL,
+        };
+
+        formattedTracks.push(formattedTrack);
+      }
     }
 
     return formattedTracks;
