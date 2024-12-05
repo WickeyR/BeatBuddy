@@ -21,7 +21,6 @@ const {
   searchAlbum,
   getTagsTopTracks,
   getTagsTopArtists,
-  deleteFromPlaylist,
   getChartTopArtists,
   getChartTopTags,
   getChartTopTracks,
@@ -165,26 +164,41 @@ app.post('/api/messageGPT', async (req, res) => {
     const userGenres = genresResults.map((row) => row.genre);
 
     // Define the system prompt and add it to the message chain
-    const systemPrompt = `
-You are Beat Buddy, a music recommender. Guide the user and make playlists based on their inputs and suggestions.
+        const systemPrompt = `
+    You are Beat Buddy, a music recommender. Guide the user and make playlists based on their inputs and suggestions.
 
-Current playlist:
-${playlistText}
+    Current playlist:
+    ${playlistText}
 
-User prefered genres:
-${userGenres}
+    User preferred genres:
+    ${userGenres}
 
-When making recommendations, avoid suggesting songs that are already in the playlist.
-ONLY WHEN  the user is unsure on what to listen to, suggest songs based on their favorite genres or ask for their current mood.
-If the user asks for a specific song, do not question it even if it is not apart of their favorite genres.
+    When making recommendations, avoid suggesting songs that are already in the playlist.
+    ONLY WHEN the user is unsure what to listen to, suggest songs based on their favorite genres or ask for their current mood.
+    If the user asks for a specific song, do not question it even if it is not part of their favorite genres.
 
-**Formatting Instructions:**
-- When listing songs, please format them as a numbered list with a seperate line for each.
-- Each song should be on a new line.
-- Include the song title and artist in the format: "Song Title" by Artist.
-- When returning song information, only list the song title and aritst unless asked.
-- Use markdown formatting if possible.
-`;
+    **Capabilities:**
+    - You can add songs to the playlist using the 'addToPlaylist' function.
+    - You can add multiple songs to the playlist using the 'addMultipleToPlaylist' function.
+    - You can delete songs from the playlist using the 'deleteFromPlaylist' function.
+    - You can delete multiple songs from the playlist using the 'deleteMultipleFromPlaylist' function.
+    - You can build a playlist using the 'buildPlaylist' function.
+
+    **Playlist Creation Instructions:**
+    - If the user provides a genre or song, use the 'buildPlaylist' function with the provided information.
+    - If the user does not know or does not specify, and you have access to their favorite genres, use one of their favorite genres to build the playlist.
+    - Use the 'buildPlaylist' function to create the playlist.
+
+    **Formatting Instructions:**
+    - When listing songs, please format them as a numbered list with a separate line for each.
+    - Each song should be on a new line.
+    - Include the song title and artist in the format: "Song Title" by Artist.
+    - When returning song information, only list the song title and artist unless asked.
+    - Use markdown formatting if possible.
+    - avoid including any links to image urls for song information
+    `;
+
+
 
     const aiMessages = [
       { role: 'system', content: systemPrompt },
@@ -282,12 +296,7 @@ If the user asks for a specific song, do not question it even if it is not apart
             process.env.LAST_FM_API_KEY
           );
           break;
-        case 'deleteFromPlaylist':
-          functionResult = await deleteFromPlaylist(
-            functionArgs.songTitle,
-            functionArgs.artist
-          );
-          break;
+       
         case 'printPlaylist':
           functionResult = await printPlaylist();
           break;
@@ -321,6 +330,36 @@ If the user asks for a specific song, do not question it even if it is not apart
             functionArgs.artist
           );
           break;
+          case 'addMultipleToPlaylist':
+            functionResult = await addMultipleToPlaylist(
+              conversationId,
+              functionArgs.songs
+            );
+            break;
+        
+        
+          case 'deleteMultipleFromPlaylist':
+            functionResult = await deleteMultipleFromPlaylist(
+              conversationId,
+              functionArgs.songs
+            );
+            break;
+         case 'deleteFromPlaylist':
+            functionResult = await deleteFromPlaylist(
+              conversationId,
+              functionArgs.songTitle,
+              functionArgs.artist
+            );
+            break;
+            case 'buildPlaylist':
+              functionResult = await buildPlaylist(
+                req.session.userId, // userId
+                conversationId,
+                functionArgs.genre || null,
+                functionArgs.songTitle || null,
+                functionArgs.artist || null
+              );
+              break;
         default:
           throw new Error(`Function ${functionName} is not implemented.`);
       }
@@ -492,7 +531,103 @@ async function addToPlaylist(conversation_id, songTitle, artist) {
     throw error;
   }
 }
+// Function to delete a song from the playlist
+async function deleteFromPlaylist(conversation_id, songTitle, artist) {
+  try {
+    const deleteQuery = `
+      DELETE FROM playlist
+      WHERE conversation_id = ? AND song_title = ? AND song_artist = ?
+    `;
+    const [result] = await db.query(deleteQuery, [conversation_id, songTitle, artist]);
 
+    if (result.affectedRows === 0) {
+      console.log('Song is not in playlist.');
+      return { status: 'Song is not in playlist.', error: true };
+    }
+
+    console.log('Song removed from playlist.');
+    return { status: 'Song removed from playlist.' };
+  } catch (error) {
+    console.error('Error deleting song from playlist:', error);
+    throw error;
+  }
+}
+
+
+// Function to add multiple songs to playlist
+async function addMultipleToPlaylist(conversation_id, songs) {
+  try {
+    for (const song of songs) {
+      await addToPlaylist(conversation_id, song.songTitle, song.artist);
+    }
+    return { message: 'Songs added to playlist successfully.' };
+  } catch (error) {
+    console.error('Error adding multiple songs to playlist:', error);
+    throw error;
+  }
+}
+// Function to delete multiple songs from playlist
+async function deleteMultipleFromPlaylist(conversation_id, songs) {
+  try {
+    for (const song of songs) {
+      await deleteFromPlaylist(conversation_id, song.songTitle, song.artist);
+    }
+    return { message: 'Songs deleted from playlist successfully.' };
+  } catch (error) {
+    console.error('Error deleting multiple songs from playlist:', error);
+    throw error;
+  }
+}
+
+// Function to build a playlist
+async function buildPlaylist(userId, conversationId, genre = null, songTitle = null, artist = null) {
+  console.log('buildPlaylist called');
+
+  try {
+    let tracks = [];
+
+    if (songTitle && artist) {
+      // Get related tracks based on the provided song
+      tracks = await getRelatedTracks(artist, songTitle, 10, process.env.LAST_FM_API_KEY);
+    } else if (genre) {
+      // Get top tracks for the provided genre
+      tracks = await getTagsTopTracks(genre, 10, process.env.LAST_FM_API_KEY);
+    } else {
+      // Fetch user's favorite genres
+      const favoriteGenres = await getUserFavoriteGenres(userId);
+
+      if (favoriteGenres.length > 0) {
+        genre = favoriteGenres[0]; // Use the first favorite genre
+        tracks = await getTagsTopTracks(genre, 10, process.env.LAST_FM_API_KEY);
+      } else {
+        // Fallback to chart top tracks
+        tracks = await getChartTopTracks(10, process.env.LAST_FM_API_KEY);
+      }
+    }
+
+    // Add tracks to the playlist
+    for (const track of tracks) {
+      await addToPlaylist(conversationId, track.songTitle || track.title, track.artist);
+    }
+
+    return { message: 'Playlist built successfully.' };
+  } catch (error) {
+    console.error('Error building playlist:', error);
+    throw error;
+  }
+}
+
+// Function to get user's favorite genres
+async function getUserFavoriteGenres(userId) {
+  try {
+    const selectGenresQuery = 'SELECT genre FROM user_genres WHERE user_id = ?';
+    const [genresResults] = await db.query(selectGenresQuery, [userId]);
+    return genresResults.map((row) => row.genre);
+  } catch (err) {
+    console.error('Error fetching user favorite genres:', err);
+    return [];
+  }
+}
 
 //--------------------------User Login and Signup Functions -----------------//
 
@@ -861,6 +996,7 @@ function getSpotifyApiForUser(userId) {
   });
 }
 
+//route to create a playlist
 app.post('/exportPlaylist', isAuthenticated, async (req, res) => {
   const userId = req.session.userId;
   const conversationId = req.body.conversationId;
@@ -873,7 +1009,7 @@ app.post('/exportPlaylist', isAuthenticated, async (req, res) => {
     const meData = await spotifyApi.getMe();
     const spotifyUserId = meData.body.id;
 
-    // Fetch the playlist from your database using promises
+    // Fetch the playlist from your database
     const selectPlaylistQuery = 'SELECT * FROM playlist WHERE conversation_id = ?';
     const [playlistResults] = await db.query(selectPlaylistQuery, [conversationId]);
 
@@ -881,11 +1017,55 @@ app.post('/exportPlaylist', isAuthenticated, async (req, res) => {
       return res.status(400).json({ error: 'Playlist is empty' });
     }
 
-    let playlistName = `BeatBuddy Playlist - ${new Date().toLocaleDateString()}`;
+    // Prepare the list of songs for the AI prompt
+    const songsList = playlistResults
+      .map(song => `"${song.song_title}" by ${song.song_artist}`)
+      .join('\n');
 
-    // Create a new playlist in Spotify
+    // Create the AI prompt
+    const prompt = `
+I have a playlist with the following songs:
+${songsList}
+
+Based on these songs, please generate a creative and unique playlist title and a short description.
+
+Return the result in JSON format **without any code formatting or code fences**, like:
+{
+  "title": "Your Creative Playlist Title",
+  "description": "A short description of the playlist"
+}
+`;
+
+    // Call the OpenAI API
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 150,
+      temperature: 0.7,
+    });
+
+    // Get the AI's response
+    let aiResponse = completion.choices[0].message.content;
+
+    // Sanitize the AI response
+    aiResponse = aiResponse.replace(/```(?:json)?\s*([\s\S]*?)\s*```/g, '$1').trim();
+
+    let playlistName = `BeatBuddy Playlist - ${new Date().toLocaleDateString()}`;
+    let playlistDescription = '';
+
+    try {
+      const aiOutput = JSON.parse(aiResponse);
+      playlistName = aiOutput.title || playlistName;
+      playlistDescription = aiOutput.description || '';
+    } catch (err) {
+      console.error('Error parsing AI response:', err);
+      // If parsing fails, use default values
+    }
+
+    // Create a new playlist in Spotify with the AI-generated title and description
     const createPlaylistData = await spotifyApi.createPlaylist(playlistName, {
       public: false,
+      description: playlistDescription,
     });
 
     const spotifyPlaylistId = createPlaylistData.body.id;
@@ -937,6 +1117,7 @@ app.post('/exportPlaylist', isAuthenticated, async (req, res) => {
     res.status(500).json({ error: 'Failed to export playlist to Spotify' });
   }
 });
+
 
 // Check if the user is connected to Spotify
 app.get('/spotify/status', isAuthenticated, async (req, res) => {

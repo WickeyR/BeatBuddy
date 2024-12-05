@@ -467,6 +467,10 @@ function connectToSpotify() {
 function exportPlaylist() {
   if (!currentConversationId) return;
 
+  // Show the loading spinner
+  const loadingSpinner = document.getElementById('loading-spinner');
+  loadingSpinner.classList.remove('hidden');
+
   fetch('/exportPlaylist', {
     method: 'POST',
     headers: {
@@ -476,6 +480,9 @@ function exportPlaylist() {
     credentials: 'include', // Include cookies
   })
     .then((response) => {
+      // Hide the loading spinner
+      loadingSpinner.classList.add('hidden');
+
       if (!response.ok) {
         return response.json().then((errData) => {
           throw new Error(errData.error || 'Failed to export playlist');
@@ -492,10 +499,14 @@ function exportPlaylist() {
       }
     })
     .catch((error) => {
+      // Hide the loading spinner in case of error
+      loadingSpinner.classList.add('hidden');
+
       console.error('Error exporting playlist:', error);
       showNotification('Failed to export playlist: ' + error.message, 'error');
     });
 }
+
 
 
 

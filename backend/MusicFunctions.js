@@ -1,8 +1,5 @@
 //MusicFunctions.js: Creates methods to retrieve music information from the Last.fm database, and provide functions to store the data
 
-//Enter your Last.fm API Key here
-
-
 
 
 //-----------------------------------------Imports -------------------------------------------------------
