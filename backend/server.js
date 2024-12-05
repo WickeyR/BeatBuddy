@@ -175,7 +175,8 @@ User prefered genres:
 ${userGenres}
 
 When making recommendations, avoid suggesting songs that are already in the playlist.
-When the user is unsure on what to listen to, suggest songs based on their favorite genres or ask for their current mood.
+ONLY WHEN  the user is unsure on what to listen to, suggest songs based on their favorite genres or ask for their current mood.
+If the user asks for a specific song, do not question it even if it is not apart of their favorite genres.
 
 **Formatting Instructions:**
 - When listing songs, please format them as a numbered list with a seperate line for each.
