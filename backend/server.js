@@ -33,28 +33,35 @@ require('dotenv').config();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Session configuration
-const isSecure = process.env.NODE_ENV === 'production' && process.env.SECURE_COOKIE === 'true';
+const isProduction = process.env.NODE_ENV === 'production';
 
-// Session configuration
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: true,        // Must be true if sameSite is 'none'
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
-      sameSite: 'none',    // none for deployment, lax for development
-    },
-  })
-);
+
+// Set the callback URL based on the environment
+const SPOTIFY_CALLBACK_URL = isProduction
+  ? process.env.PRODUCTION_REDIRECT_URI
+  : process.env.LOCAL_REDIRECT_URI;
+
+
+
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: isProduction, // True in production, false in development
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24, // 1 day
+        sameSite: isProduction ? 'none' : 'lax', // 'none' for production to allow cross-site cookies
+      },
+    })
+  );
+  
 app.use(passport.initialize());
 app.use(passport.session());
 
-if (process.env.NODE_ENV === 'production') {
-  app.set('trust proxy', 1); // Trust the first proxy
+if (isProduction) {
+  app.set('trust proxy', 1); // Trust the first proxy (e.g., load balancer)
 }
 
 // Serve static files from the "public" directory
@@ -862,7 +869,7 @@ function isAuthenticated(req, res, next) {
     res.redirect('/');
   }
 }
-
+//BEFORE CHANGE
 //-----------------spotify connection ------------------------
 
 // Configure Spotify Strategy
@@ -871,19 +878,35 @@ passport.use(
     {
       clientID: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: process.env.SPOTIFY_CALLBACK_URL,
+      callbackURL: SPOTIFY_CALLBACK_URL,
       passReqToCallback: true,
     },
     async function (req, accessToken, refreshToken, expires_in, profile, done) {
       try {
-        // Decode the state parameter to get the userId
+        // Decode and validate the state parameter to get the userId
         let userId;
         if (req.query && req.query.state) {
-          const state = JSON.parse(Buffer.from(req.query.state, 'base64').toString('utf-8'));
+          let decodedState;
+          try {
+            decodedState = Buffer.from(req.query.state, 'base64').toString('utf-8');
+          } catch (decodeError) {
+            console.error('Failed to decode state parameter:', decodeError);
+            return done(new Error('Invalid state parameter.'));
+          }
+
+          let state;
+          try {
+            state = JSON.parse(decodedState);
+          } catch (parseError) {
+            console.error('Failed to parse state parameter:', parseError);
+            return done(new Error('Invalid state parameter format.'));
+          }
+
           userId = state.userId;
         }
 
         if (!userId) {
+          console.error('Spotify authentication failed: Missing userId in state.');
           return done(new Error('User not authenticated.'));
         }
 
@@ -895,18 +918,22 @@ passport.use(
           SET spotify_access_token = ?, spotify_refresh_token = ?, spotify_token_expires = ?
           WHERE id = ?
         `;
-        await db.query(updateQuery, [accessToken, refreshToken, expiresAt, userId]);
+        const [result] = await db.query(updateQuery, [accessToken, refreshToken, expiresAt, userId]);
 
-        console.log('Spotify tokens stored in database for user:', userId);
+        if (result.affectedRows === 0) {
+          console.error(`Spotify authentication failed: No user found with id ${userId}.`);
+          return done(new Error('User not found.'));
+        }
+
+        console.log(`Spotify tokens stored successfully for user ID: ${userId}`);
         done(null, profile);
       } catch (err) {
-        console.error('Error storing Spotify tokens:', err);
+        console.error('Error in Spotify Strategy verify callback:', err);
         done(err);
       }
     }
   )
 );
-
 
 // Serialize and deserialize user
 passport.serializeUser(function (user, done) {
@@ -917,22 +944,12 @@ passport.deserializeUser(function (obj, done) {
   done(null, obj);
 });
 
-// Authentication routes
+// Authentication Route
 app.get('/auth/spotify', (req, res, next) => {
   if (!req.session.userId) {
     // User is not authenticated, redirect to login
     return res.redirect('/login');
   }
-
-app.get(
-  '/auth/spotify/callback',
-  passport.authenticate('spotify', { failureRedirect: '/signup' }),
-  function (req, res) {
-    // On success
-    res.redirect('/dashboard');
-  }
-);
-
 
   // Encode the userId into the state parameter
   const state = Buffer.from(JSON.stringify({ userId: req.session.userId })).toString('base64');
@@ -942,6 +959,16 @@ app.get(
     state: state,
   })(req, res, next);
 });
+
+// Callback Route
+app.get(
+  '/auth/spotify/callback',
+  passport.authenticate('spotify', { failureRedirect: '/signup' }),
+  function (req, res) {
+    // On successful authentication
+    res.redirect('/dashboard');
+  }
+);
 
 function getSpotifyApiForUser(userId) {
   return new Promise(async (resolve, reject) => {
@@ -1149,7 +1176,7 @@ app.get('/dashboard', isAuthenticated, (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'chatApplication.html'));
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}`);
 });
