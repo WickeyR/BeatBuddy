@@ -1,100 +1,69 @@
 /* 1. Global Styles */
-* {
-    box-sizing: border-box; /* Include padding and border in element's total width and height */
-}
-
-/* 2. Body and Wrapper */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 0;
     width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* Corrected from 100vn to 100vh */
-    overflow-x: hidden; /* Prevent horizontal scrolling */
+    overflow-x: hidden;
 }
 
-/* 3. Container for Application */
-.container {
-    display: flex; /* Enables flexbox */
-    flex-direction: row; /* Horizontal alignment */
-    justify-content: space-between; /* Space between the side containers */
-    align-items: stretch; /* Ensures all containers are the same height */
-    height: 100vh; /* Make it take the full height of the viewport */
-    gap: 10px; /* Adds spacing between the containers */
-    width: 100%; /* Full width */
-    padding-top: 50px; /* Space for the fixed navbar */
+/* Remove default list styles */
+ul {
+    list-style: none;
+    padding: 0;
     margin: 0;
 }
 
-/* 4. Navigation Bar */
-nav {
-    position: fixed; /* Keep the navbar fixed */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 50px; /* Navbar height */
-    box-shadow: 1px 1px 5px #80808057;
-    background-color: white;
-    border-bottom: 1px solid gray;
-    z-index: 1000; /* Ensure nav stays above other elements */
+/* Headings */
+h2 {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 1.5em;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #fff;
 }
 
-.nav-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    padding: 4px;
-    justify-content: space-between;
-}
-
-.nav-logo {
-    display: flex; 
-    align-items: center; 
-}
-
-.logo {
+/* 2. Navigation Bar */
+.navbar-brand .logo {
     height: 32px;
     margin-right: 12px;
 }
 
-.title {
+.navbar-brand .title {
     font-size: 24px;
     font-weight: bold;
 }
 
-/* 5. Left Sidebar (Chat History) */
+#logout-form button {
+    padding: 8px 16px;
+}
+
+#logout-form button:hover {
+    background-color: #e60000;
+}
+
+/* 3. Chat History Sidebar */
 .chat-history {
-    flex: 0 0 20%; /* Fixed width at 20% */
-    background-color: #202123; /* Dark background similar to ChatGPT */
-    color: #d1d5db; /* Light text color */
+    background-color: #202123;
+    color: #d1d5db;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    transition: transform 0.3s ease-in-out;
-}
-.chat-history-footer {
     padding: 10px;
 }
 
-#delete-all-chats-button {
-    width: 100%;
-    padding: 10px;
+.chat-history h2 {
+    color: #d1d5db;
+}
+
+#new-chat-button {
     background-color: #343541;
     color: #d1d5db;
     border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Center the button text */
-    gap: 10px;
-    border-radius: 5px;
-    cursor: pointer;
 }
 
-#delete-all-chats-button:hover {
+#new-chat-button:hover {
     background-color: #454654;
 }
 
@@ -102,11 +71,6 @@ nav {
     display: flex;
     align-items: center;
     padding: 10px;
-    cursor: pointer;
-}
-
-.chat-history-item:hover {
-    background-color: #343541;
 }
 
 .chat-history-item-button {
@@ -118,6 +82,10 @@ nav {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.chat-history-item-button:hover {
+    background-color: #343541;
 }
 
 .chat-history-delete-button {
@@ -132,159 +100,52 @@ nav {
 .chat-history-delete-button:hover {
     color: #fff;
 }
-.chat-history.visible {
-    transform: translateX(0);
-}
-
-@media screen and (max-width: 768px) {
-    .chat-history {
-        position: fixed;
-        top: 50px; /* Below the navbar */
-        left: 0;
-        height: calc(100vh - 50px); /* Full height minus navbar */
-        z-index: 999;
-        transform: translateX(-100%); /* Hidden off-screen */
-        width: 250px;
-    }
-}
-
-/* Chat History Header */
-.chat-history-header {
-    padding: 10px;
-}
-
-#new-chat-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #343541;
-    color: #d1d5db;
-    border: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#new-chat-button:hover {
-    background-color: #454654;
-}
-
-.icon-plus {
-    width: 16px;
-    height: 16px;
-}
-
-/* Chat History List */
-#chat-history-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    flex-grow: 1;
-    overflow-y: auto;
-}
-
-.chat-history-item {
-    width: 100%;
-}
-
-.chat-history-item-button {
-    width: 100%;
-    padding: 10px;
-    text-align: left;
-    background-color: transparent;
-    color: #d1d5db;
-    border: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-}
-
-.chat-history-item-button:hover {
-    background-color: #343541;
-}
-
-/* Chat History Footer */
-.chat-history-footer {
-    padding: 10px;
-}
 
 #delete-all-chats-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #343541;
-    color: #d1d5db;
+    background-color: #ff4d4d;
+    color: #fff;
     border: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border-radius: 5px;
-    cursor: pointer;
 }
 
 #delete-all-chats-button:hover {
-    background-color: #454654;
+    background-color: #e60000;
 }
 
-.icon-trash {
-    width: 16px;
-    height: 16px;
-}
-
-/* 6. Right Sidebar (Chat Playlist) */
+/* 4. Chat Playlist Sidebar */
 .chat-playlist {
-    flex: 0 0 20%; /* Fixed width at 20% */
-    background-color: #121212; /* Dark background similar to Spotify */
-    color: #fff; /* White text color */
+    background-color: #121212;
+    color: #fff;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    transition: transform 0.3s ease-in-out;
-}
-
-.chat-playlist.visible {
-    transform: translateX(0);
-}
-
-@media screen and (max-width: 768px) {
-    .chat-playlist {
-        position: fixed;
-        top: 50px; /* Below the navbar */
-        right: 0;
-        height: calc(100vh - 50px); /* Full height minus navbar */
-        z-index: 999;
-        transform: translateX(100%); /* Hidden to the right */
-        width: 250px;
-    }
-}
-
-/* Chat Playlist Header */
-.chat-playlist-header {
-    padding: 20px 20px 10px 20px;
-    border-bottom: 1px solid #282828;
+    padding: 10px;
 }
 
 .chat-playlist h2 {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin: 0;
+    color: #fff;
 }
 
-/* Spotify Buttons */
+/* Divider */
+.divider {
+    height: 1px;
+    background-color: #282828;
+    margin: 10px 0;
+}
+
+/* Centering headings */
+.playlist-container h2,
+.suggestions-container h2 {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 1.5em;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
 #connect-spotify-button,
 #export-playlist-button {
-    width: 100%;
-    padding: 10px;
     background-color: #1DB954;
     color: #fff;
     border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    border-radius: 5px;
-    margin-top: 10px;
     font-size: 1em;
     cursor: pointer;
     transition: background-color 0.3s;
@@ -295,26 +156,34 @@ nav {
     background-color: #1ed760;
 }
 
-/* Chat Playlist List */
-#chat-playlist-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    flex-grow: 1;
+/* Split playlist into two equal containers */
+.playlist-container,
+.suggestions-container {
     overflow-y: auto;
 }
 
-/* Playlist Items */
-.playlist-item {
-    display: flex;
-    align-items: center;
-    padding: 15px 20px;
-    transition: background-color 0.2s;
-    cursor: pointer;
+/* Add borders to containers */
+.playlist-container {
+    border-bottom: 1px solid #282828;
+    padding-bottom: 10px;
 }
 
-.playlist-item:hover {
-    background-color: #282828;
+.suggestions-container {
+    padding-top: 10px;
+}
+
+.playlist-container.flex-fill,
+.suggestions-container.flex-fill {
+    flex: 1 1 50%;
+}
+
+/* Playlist Items */
+.playlist-item,
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #282828;
 }
 
 .song-image {
@@ -356,28 +225,7 @@ nav {
     color: #fff;
 }
 
-.delete-icon {
-    width: 20px;
-    height: 20px;
-}
-
-
-
-
-
-/* Suggestion Items */
-.suggestion-item {
-    display: flex;
-    align-items: center;
-    padding: 15px 20px;
-    transition: background-color 0.2s;
-    cursor: pointer;
-}
-
-.suggestion-item:hover {
-    background-color: #282828;
-}
-
+/* Add Button */
 .add-button {
     background-color: #1DB954;
     color: #fff;
@@ -393,86 +241,58 @@ nav {
     background-color: #1ed760;
 }
 
-
-
-
-/* 7. Main Chat Box */
+/* 5. Main Chat Box */
 .box {
     display: flex;
-    flex: 3; /* Represents 60% width */
     flex-direction: column;
-    justify-content: space-between; /* Aligns chat form to the bottom */
-    height: 100%; /* Full height of the parent container */
-    overflow: hidden; /* Prevents overflow issues */
+    height: 100%;
 }
 
-/* Chat Messages Section */
 .chat-messages {
-    flex: 1; /* Takes up all remaining space */
-    overflow-y: auto; /* Allows scrolling for long chat history */
-    padding: 10px; /* Adds spacing */
-    background-color: #f9f9f9; /* Background color */
-    scrollbar-width: thin;
-    scrollbar-color: #888 transparent;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+    background-color: #f9f9f9;
 }
 
-.chat-messages::-webkit-scrollbar {
-    width: 8px;
-}
-
-.chat-messages::-webkit-scrollbar-thumb {
-    background-color: #888;
-    border-radius: 4px;
-}
-
-.chat-messages::-webkit-scrollbar-track {
-    background-color: transparent;
-}
-
-/* Chat Form */
 .chat-form {
     display: flex;
-    gap: 20px; /* Space between textarea and buttons */
-    padding: 10px; /* Adds spacing around the form */
-    background-color: #fff; /* Background color */
-    border-top: 1px solid #ddd; /* Border to separate from messages */
+    padding: 10px;
+    background-color: #fff;
+    border-top: 1px solid #ddd;
 }
 
 #userinput {
-    flex: 1; /* Textarea takes up most of the space */
-    resize: none; /* Prevent manual resizing */
-    height: 40px; /* Fixed height */
-    padding: 0 10px; /* Horizontal padding */
-    font-size: 16px; /* Font size */
-    line-height: 40px; /* Match line-height to height for vertical centering */
-    border-radius: 8px; /* Slight rounding */
-    border: 1px solid #ccc; /* Border for visibility */
-    overflow: hidden; /* Hide overflow */
+    flex: 1;
+    resize: none;
+    height: 40px;
+    padding: 0 10px;
+    font-size: 16px;
+    line-height: 40px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    overflow: hidden;
 }
 
-button {
-    padding: 10px 15px;
-    font-size: 14px;
-    cursor: pointer;
-    border: none;
-    border-radius: 4px;
-    transition: background-color 0.3s;
+.send-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-button:hover {
-    background-color: #ddd;
+.send-button .icon {
+    width: 20px;
+    height: 20px;
 }
 
-/* 8. Messages Styling */
+/* 6. Messages Styling */
 .message {
-    margin: 20px;
+    margin: 10px 0;
 }
 
 .usermessagediv {
     display: flex;
     justify-content: flex-end;
-    flex-wrap: wrap;
-    margin-left: 20%;
 }
 
 .usermessage {
@@ -487,8 +307,6 @@ button:hover {
 .appmessagediv {
     display: flex;
     justify-content: flex-start;
-    flex-wrap: wrap;
-    margin-right: 20%;
 }
 
 .appmessage {
@@ -500,205 +318,21 @@ button:hover {
     word-wrap: break-word;
 }
 
-
-/* 9. Logout Button Styling */
-#logout-form {
-    margin-left: auto;
+/* Scrollbar Styles */
+.chat-messages::-webkit-scrollbar {
+    width: 8px;
 }
 
-#logout-form button {
-    padding: 8px 16px;
-    background-color: #ff4d4d;
-    color: white;
-    border: none;
+.chat-messages::-webkit-scrollbar-thumb {
+    background-color: #888;
     border-radius: 4px;
-    cursor: pointer;
 }
 
-#logout-form button:hover {
-    background-color: #e60000;
+.chat-messages::-webkit-scrollbar-track {
+    background-color: transparent;
 }
 
-/* 10. Action Frame */
-.Frame248 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    width: 100%;
-    max-width: 578px;
-}
-
-/* 11. Responsive Styles */
-
-/* Medium Devices (Tablets, 768px and below) */
-@media screen and (max-width: 768px) {
-    /* Adjust Container */
-    .container {
-        flex-direction: column;
-        margin-top: 50px; /* Space for navbar */
-        height: calc(100vh - 50px); /* Full height minus navbar */
-    }
-
-    /* Hide sidebars by default */
-    .chat-history,
-    .chat-playlist {
-        transform: translateX(-100%); /* Hidden off-screen */
-        position: fixed; /* Fixed for sliding effect */
-        top: 50px; /* Below the navbar */
-        height: calc(100vh - 50px); /* Full height minus navbar */
-        z-index: 999; /* Above other elements */
-        width: 250px; /* Sidebar width */
-        transition: transform 0.3s ease-in-out;
-    }
-
-    .chat-playlist {
-        transform: translateX(100%); /* Hidden to the right */
-        right: 0; /* Align to the right */
-    }
-
-    /* Show sidebars when visible */
-    .chat-history.visible {
-        transform: translateX(0); /* Slide into view */
-    }
-
-    .chat-playlist.visible {
-        transform: translateX(0); /* Slide into view */
-    }
-
-    /* Main Chat Box Adjustments */
-    .box {
-        width: 100%;
-        margin: 0 auto;
-        height: 100%; /* Fill the container's height */
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        transition: margin-left 0.3s ease-in-out, margin-right 0.3s ease-in-out;
-    }
-
-    .box.sidebar-left-open {
-        margin-left: 250px; /* Adjust when left sidebar is open */
-    }
-
-    .box.sidebar-right-open {
-        margin-right: 250px; /* Adjust when right sidebar is open */
-    }
-
-    /* Ensure .chat-messages takes up available space */
-    .chat-messages {
-        flex-grow: 1;
-    }
-
-    /* Toggle Buttons */
-    .sidebar-toggle {
-        display: block; /* Ensure buttons are visible */
-        position: fixed;
-        top: 60px; /* Below the navbar */
-        z-index: 1000;
-        background-color: #1DB954;
-        color: #fff;
-        border: none;
-        padding: 10px;
-        border-radius: 5px;
-        font-size: 1em;
-        cursor: pointer;
-    }
-
-    #toggle-chat-history {
-        left: 10px; /* Position on the left */
-    }
-
-    #toggle-chat-playlist {
-        right: 10px; /* Position on the right */
-    }
-
-    .sidebar-toggle:hover {
-        background-color: #1ed760; /* Brighter green on hover */
-    }
-
-    /* Adjust Chat Form */
-    .chat-form {
-        padding: 10px;
-        gap: 10px; /* Reduce gap between textarea and buttons */
-    }
-
-    #userinput {
-        height: 40px; /* Adjust height if necessary */
-        font-size: 14px; /* Adjust font size for better readability */
-    }
-
-    button {
-        padding: 8px 12px;
-        font-size: 14px;
-    }
-
-    /* Adjust Messages for Smaller Screens */
-    .usermessagediv,
-    .appmessagediv {
-        margin-left: 0;
-        margin-right: 0;
-    }
-
-    .usermessage,
-    .appmessage {
-        max-width: 100%;
-    }
-}
-
-/* Small Devices (Portrait Phones, 480px and below) */
-@media screen and (max-width: 480px) {
-    /* Further adjust chat-playlist and chat-history if necessary */
-
-    .chat-playlist-header,
-    .chat-history-header {
-        padding: 15px;
-    }
-
-    /* Ensure chat form remains at the bottom */
-    .box {
-        height: calc(100vh - 50px); /* Ensure full height minus navbar */
-    }
-
-    /* Adjust chat messages padding */
-    .chat-messages {
-        padding: 8px;
-    }
-
-    .appmessage {
-        max-width: 65%;
-    }
-}
-
-/* Extra Small Devices (Portrait Phones, 300px and below) */
-@media screen and (max-width: 300px) {
-    /* Similar adjustments as smaller screens */
-
-    .chat-playlist-header,
-    .chat-history-header {
-        padding: 10px;
-    }
-
-    .chat-playlist,
-    .chat-history {
-        width: 200px; /* Slightly narrower sidebars */
-    }
-
-    /* Ensure chat form remains accessible */
-    .chat-form {
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    button {
-        width: 100%;
-    }
-    .appmessage {
-        max-width: 70%;
-    }
-}
-
-/* 12. Popup Styles */
+/* 7. Popup Styles */
 .popup-container {
     position: fixed;
     top: 0;
@@ -735,13 +369,13 @@ button:hover {
     background: none;
     border: none;
     font-size: 20px;
-    color: #ff4d4d; /* Red color */
+    color: #ff4d4d;
     cursor: pointer;
     transition: color 0.2s ease-in-out;
 }
 
 .popup-close-left:hover {
-    color: #e60000; /* Darker red on hover */
+    color: #e60000;
 }
 
 .popup-content {
@@ -772,18 +406,28 @@ button:hover {
         opacity: 0;
         transform: scale(0.9);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
     }
 }
 
-.container {
-    width: 100%;
-    margin: 0;
-}
+/* 8. Responsive Adjustments */
+@media (max-width: 768px) {
+    /* Stack sidebars below the main content */
+    .chat-history,
+    .chat-playlist {
+        flex: 0 0 100%;
+    }
 
-.chat-history,
-.chat-playlist {
-    flex-shrink: 0;
+    .col-md-2,
+    .col-md-8 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .chat-playlist {
+        margin-top: 20px;
+    }
 }
