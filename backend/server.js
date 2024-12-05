@@ -193,7 +193,8 @@ app.post('/api/messageGPT', async (req, res) => {
 
     **Playlist Creation Instructions:**
     - If the user provides a genre or song, use the 'buildPlaylist' function with the provided information.
-    - If the user does not know or does not specify, and you have access to their favorite genres, use one of their favorite genres to build the playlist.
+    - If the user does not know or does not specify, suggest some songs based on their favorite genres, but do not build the playlist yet.
+    - Do not build a playlist even when suggesting songs unless the user specifically asks you to. 
     - Use the 'buildPlaylist' function to create the playlist.
 
     **Formatting Instructions:**
