@@ -193,6 +193,7 @@ app.post('/api/messageGPT', async (req, res) => {
     - You can build a playlist using the 'buildPlaylist' function.
 
     **Playlist Creation Instructions:**
+    - If the user is feeling a specific mood, give them songs that relate to that mood/genre.
     - If the user provides a genre or song, use the 'buildPlaylist' function with the provided information.
     - If the user does not know or does not specify, suggest some songs based on their favorite genres, but do not build the playlist yet.
     - Do not build a playlist even when suggesting songs unless the user specifically asks you to. 
