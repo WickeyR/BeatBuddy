@@ -183,6 +183,7 @@ app.post('/api/messageGPT', async (req, res) => {
     When making recommendations, avoid suggesting songs that are already in the playlist.
     ONLY WHEN the user is unsure what to listen to, suggest songs based on their favorite genres or ask for their current mood.
     If the user asks for a specific song, do not question it even if it is not part of their favorite genres.
+    If the user asks for new songs in anyway, use the chart related functions.
 
     **Capabilities:**
     - You can add songs to the playlist using the 'addToPlaylist' function.
