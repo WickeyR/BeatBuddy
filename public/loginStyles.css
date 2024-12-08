@@ -168,7 +168,7 @@ input {
     .background-images {
         grid-template-columns: repeat(2, 1fr); /* Exactly two per row */
         height: 600%; /* Adjust height if necessary */
-        animation: scrollUp 60s linear infinite; /* Optionally speed up animation */
+        animation: scrollUp 60s linear infinite; 
     }
     
     /* Scale up the login overlay */
@@ -178,7 +178,7 @@ input {
     }
     
     .website-title {
-        font-size: 24px; /* Adjust font size */
+        font-size: 24px; 
     }
     
     .website-tagline {

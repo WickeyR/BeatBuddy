@@ -165,7 +165,7 @@ h2 {
     display: flex;
     flex-direction: column;
     overflow-y: auto; /* Add scrolling if content overflows */
-    margin-bottom: 1rem; /* Optional spacing between sections */
+    margin-bottom: 1rem; 
 }
 
 
@@ -175,7 +175,7 @@ h2 {
     display: flex;
     flex-direction: column;
     overflow-y: auto; /* Add scrolling if content overflows */
-    margin-bottom: 1rem; /* Optional spacing between sections */
+    margin-bottom: 1rem;
 }
 .playlist-container h2,
 .suggestions-container h2 {
@@ -466,7 +466,7 @@ h2 {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 2000; /* Above other content */
+    z-index: 2000; 
 }
 
 .loading-spinner.hidden {

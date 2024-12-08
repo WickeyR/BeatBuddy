@@ -1,4 +1,4 @@
-// chatApplicationFunctions.js
+// chatApplicationFunctions.js: Define functions to be used in the main chat application
 
 // Variables to keep track of current conversation
 let currentConversationId = null;
@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('popup-container').classList.add('hidden');
   });
 
+  // Event listener to create a new chat
   document.getElementById('new-chat-button').addEventListener('click', function () {
     createNewConversation();
     fetchChatHistory();
@@ -73,11 +74,12 @@ function fetchUserInfo() {
     .catch((error) => {
       console.error('An error has occurred fetching username:', error);
     });
-  createNewConversation(); // If you want to start a new conversation on page load
+  createNewConversation(); 
 }
 
 // Function to delete all conversations
 function deleteAllConversations() {
+
   if (confirm('Are you sure you want to delete all conversations? This action cannot be undone.')) {
     fetch('/conversations', {
       method: 'DELETE',
@@ -119,17 +121,17 @@ function fetchChatHistory() {
 
       conversations.forEach((conversation) => {
         const li = document.createElement('li');
-        li.className = 'chat-history-item'; // Match CSS class
+        li.className = 'chat-history-item';
 
         // Chat title button
         const button = document.createElement('button');
-        button.className = 'chat-history-item-button'; // Style per updated CSS
+        button.className = 'chat-history-item-button'; 
         button.dataset.conversationId = conversation.conversation_id;
 
         // Format the display title
         const startTime = new Date(conversation.start_time);
         const relativeTime = timeSince(new Date(startTime));
-        button.textContent = conversation.title || `Chat from ${relativeTime}`; // Fixed template literal
+        button.textContent = conversation.title || `Chat from ${relativeTime}`; 
 
         // Load conversation on click
         button.addEventListener('click', () => {
@@ -144,7 +146,9 @@ function fetchChatHistory() {
 
         // Prevent propagation and delete conversation
         deleteButton.addEventListener('click', (event) => {
-          event.stopPropagation(); // Prevent click from loading the conversation
+
+           // Prevent click from loading the conversation
+          event.stopPropagation();
           deleteConversation(conversation.conversation_id);
         });
 
@@ -162,12 +166,13 @@ function fetchChatHistory() {
 // Delete a conversation
 function deleteConversation(conversationId) {
   if (confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
-    fetch(`/conversations/${conversationId}`, { // Added quotes
+    fetch(`/conversations/${conversationId}`, { 
       method: 'DELETE',
       credentials: 'include',
     })
       .then((response) => {
         if (response.ok) {
+
           // Refresh chat history
           fetchChatHistory();
 
@@ -221,7 +226,9 @@ function renderPlaylist(playlist) {
 
     // Image element
     const img = document.createElement('img');
-    img.src = song.song_large_image_url || 'images/BeatBuddyIcon.png'; // Default image if none available
+
+    // Default image if none available
+    img.src = song.song_large_image_url || 'images/BeatBuddyIcon.png'; 
     img.alt = `${song.song_title} Album Art`;
     img.className = 'song-image';
 
@@ -269,7 +276,7 @@ function createNewConversation() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ title: null }),
-    credentials: 'include', // Include cookies
+    credentials: 'include',
   })
     .then((response) => {
       if (!response.ok) {
@@ -294,7 +301,7 @@ function createNewConversation() {
 // Load a conversation
 function loadConversation(conversationId) {
   currentConversationId = conversationId;
-  fetch(`/conversations/${conversationId}/messages`, { // Added quotes
+  fetch(`/conversations/${conversationId}/messages`, { 
     credentials: 'include',
   })
     .then((response) => {
@@ -315,10 +322,10 @@ function loadConversation(conversationId) {
         const messageContentDiv = document.createElement('div');
         if (message.sender === 'user') {
           messageContentDiv.className = 'usermessagediv';
-          messageContentDiv.innerHTML = `<div class="usermessage">${message.message_content}</div>`; // Fixed template literal
+          messageContentDiv.innerHTML = `<div class="usermessage">${message.message_content}</div>`;
         } else {
           messageContentDiv.className = 'appmessagediv';
-          messageContentDiv.innerHTML = `<div class="appmessage">${message.message_content}</div>`; // Fixed template literal
+          messageContentDiv.innerHTML = `<div class="appmessage">${message.message_content}</div>`; 
         }
         messageDiv.appendChild(messageContentDiv);
         upperDiv.appendChild(messageDiv);
@@ -340,7 +347,8 @@ async function sendMessage() {
   const userinput = document.getElementById('userinput').value.trim();
   const upperdiv = document.getElementById('upperid');
 
-  if (!userinput) return; // Prevent sending empty messages
+   // Prevent sending empty messages 
+  if (!userinput) return;
 
   // Display user's message
   upperdiv.innerHTML += `
@@ -351,18 +359,19 @@ async function sendMessage() {
         </div>
       </div>
     </div>
-  `; // Fixed template literal
+  `; 
   scroll();
 
   try {
-    const response = await fetch(`/api/messageGPT`, { // Added quotes
+    const response = await fetch(`/api/messageGPT`, { 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         userInput: userinput,
-        conversationId: currentConversationId, // Pass the conversation ID
+        // Pass the conversation ID
+        conversationId: currentConversationId, 
       }),
-      credentials: 'include', // Include cookies
+      credentials: 'include', 
     });
 
     if (!response.ok) {
@@ -381,16 +390,16 @@ async function sendMessage() {
           </div>
         </div>
       </div>
-    `; // Fixed template literal
+    `; 
     scroll();
   } catch (error) {
     console.error('Error:', error);
-    // Optionally, display an error message to the user
+
     upperdiv.innerHTML += `
       <div class="message error">
         <div class="error-message">Error: ${error.message}</div>
       </div>
-    `; // Fixed template literal
+    `; 
     scroll();
   }
 
@@ -408,6 +417,7 @@ function deleteSongFromPlaylist(songId) {
   })
     .then((response) => {
       if (response.ok) {
+
         // Refresh the playlist and suggestions
         fetchPlaylist();
         fetchSuggestions();
@@ -436,7 +446,7 @@ function connectToSpotify() {
   const authWindow = window.open(
     '/auth/spotify',
     'Spotify Authentication',
-    `width=${width},height=${height},top=${top},left=${left}` // Fixed template literal
+    `width=${width},height=${height},top=${top},left=${left}` 
   );
 
   // Define the message handler
@@ -480,6 +490,7 @@ function exportPlaylist() {
     credentials: 'include', // Include cookies
   })
     .then((response) => {
+
       // Hide the loading spinner
       loadingSpinner.classList.add('hidden');
 
@@ -492,6 +503,7 @@ function exportPlaylist() {
     })
     .then((data) => {
       if (data.success) {
+        
         // Show the modal with the success message and link
         showPopup(data.playlistUrl);
       } else {
@@ -499,6 +511,7 @@ function exportPlaylist() {
       }
     })
     .catch((error) => {
+
       // Hide the loading spinner in case of error
       loadingSpinner.classList.add('hidden');
 
@@ -543,7 +556,9 @@ function renderSuggestions(suggestions) {
 
     // Image element
     const img = document.createElement('img');
-    img.src = song.imageURL || 'images/BeatBuddyIcon.png'; // Use large image URL or default
+
+    // Use large image URL or default
+    img.src = song.imageURL || 'images/BeatBuddyIcon.png'; 
     img.alt = `${song.songTitle} Album Art`;
     img.className = 'song-image';
 
@@ -680,30 +695,30 @@ function timeSince(date) {
 
   if (interval >= 1) {
     const years = Math.floor(interval);
-    return `${years} year${years !== 1 ? 's' : ''} ago`; // Fixed template literal
+    return `${years} year${years !== 1 ? 's' : ''} ago`; //
   }
   interval = seconds / 2592000;
   if (interval >= 1) {
     const months = Math.floor(interval);
-    return `${months} month${months !== 1 ? 's' : ''} ago`; // Fixed template literal
+    return `${months} month${months !== 1 ? 's' : ''} ago`; 
   }
   interval = seconds / 86400;
   if (interval >= 1) {
     const days = Math.floor(interval);
-    return `${days} day${days !== 1 ? 's' : ''} ago`; // Fixed template literal
+    return `${days} day${days !== 1 ? 's' : ''} ago`; 
   }
   interval = seconds / 3600;
   if (interval >= 1) {
     const hours = Math.floor(interval);
-    return `${hours} hour${hours !== 1 ? 's' : ''} ago`; // Fixed template literal
+    return `${hours} hour${hours !== 1 ? 's' : ''} ago`; 
   }
   interval = seconds / 60;
   if (interval >= 1) {
     const minutes = Math.floor(interval);
-    return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`; // Fixed template literal
+    return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`; 
   }
   const secs = Math.floor(seconds);
-  return `${secs} second${secs !== 1 ? 's' : ''} ago`; // Fixed template literal
+  return `${secs} second${secs !== 1 ? 's' : ''} ago`; 
 }
 
 function showNotification(message, type = 'success') {

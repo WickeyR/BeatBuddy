@@ -20,7 +20,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px; /* Added padding for better spacing on small devices */
+    padding: 20px; 
 }
 
 /* 3. Icon Image */
@@ -154,8 +154,8 @@ body {
     display: none; /* Hide the scrollbar */
 }
 .ScrollableCheckboxes {
-    -ms-overflow-style: none; /* Internet Explorer 10+ */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 .CustomCheckbox {

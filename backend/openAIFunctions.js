@@ -1,3 +1,5 @@
+//openAIFunctions: Defines functions that the openAI api model can use to assist the user
+
 const functionDefinitions = [
   {
     name: 'searchTrack',

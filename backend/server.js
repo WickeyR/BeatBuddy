@@ -1,5 +1,9 @@
+//server.js: Run the backend server to call all the api and database functions
+
+
+//Import libraries
 const express = require('express');
-const OpenAI = require('openai'); // Your OpenAI integration
+const OpenAI = require('openai'); 
 const bodyParser = require('body-parser');
 const path = require('path');
 const axios = require('axios');
@@ -13,6 +17,7 @@ const session = require('express-session');
 const { functionDefinitions, sanitizeMessages } = require('./openAIFunctions.js');
 const SpotifyWebApi = require('spotify-web-api-node');
 
+//Load up functoins from MusicFunctions.js
 const {
   getTrackInfo,
   getRelatedTracks,
@@ -33,6 +38,8 @@ require('dotenv').config();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+
+//Determine what enviorment the code is in
 const isProduction = process.env.NODE_ENV === 'production';
 
 
@@ -40,8 +47,6 @@ const isProduction = process.env.NODE_ENV === 'production';
 const SPOTIFY_CALLBACK_URL = isProduction
   ? process.env.PRODUCTION_REDIRECT_URI
   : process.env.LOCAL_REDIRECT_URI;
-
-
 
   app.use(
     session({
@@ -61,7 +66,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 if (isProduction) {
-  app.set('trust proxy', 1); // Trust the first proxy (e.g., load balancer)
+  app.set('trust proxy', 1);
 }
 
 // Serve static files from the "public" directory
@@ -113,7 +118,7 @@ app.get('/connectSpotify', isAuthenticated, (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'connectSpotify.html'));
 });
 
-//-------------------------- OpenAI API calls -----------------//
+//----------------------------- OpenAI API calls -----------------------------------------//
 
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
@@ -143,7 +148,7 @@ app.post('/api/messageGPT', async (req, res) => {
 
     
 
-     // **Fetch the current playlist for the conversation**
+     // Fetch the current playlist for the conversation
      const selectPlaylistQuery = 'SELECT song_title, song_artist FROM playlist WHERE conversation_id = ?';
      const [playlistResults] = await db.query(selectPlaylistQuery, [conversationId]);
 
@@ -381,7 +386,7 @@ app.post('/api/messageGPT', async (req, res) => {
         content: JSON.stringify(functionResult),
       });
 
-      // **Reconstruct aiMessages with the updated conversation history**
+      // Reconstruct aiMessages with the updated conversation history
       const aiMessagesAfterFunction = [
         { role: 'system', content: systemPrompt },
         ...conversationHistory,
@@ -414,6 +419,7 @@ app.post('/api/messageGPT', async (req, res) => {
       // Send the final response to the client
       res.json({ success: true, response: finalResponseMessage });
     } else {
+
       // If no function call, handle as usual
       const aiResponse = responseMessage.content;
 
@@ -440,6 +446,7 @@ app.post('/api/messageGPT', async (req, res) => {
   }
 });
 
+//----------------------------- HTTP related Functions -----------------------------------------//
 
 
 // Get the playlist for a conversation
@@ -533,8 +540,6 @@ async function addToPlaylist(conversation_id, songTitle, artist) {
     await db.query(insertQuery, values);
     console.log('Song added to playlist:', trackInfo.name);
 
-    // Optionally, you can fetch and store suggested tracks here if needed
-
     return { message: 'Song added to playlist successfully.' };
   } catch (error) {
     console.error('Error adding song to playlist:', error);
@@ -562,7 +567,6 @@ async function deleteFromPlaylist(conversation_id, songTitle, artist) {
     throw error;
   }
 }
-
 
 // Function to add multiple songs to playlist
 async function addMultipleToPlaylist(conversation_id, songs) {
@@ -872,8 +876,8 @@ function isAuthenticated(req, res, next) {
     res.redirect('/');
   }
 }
-//BEFORE CHANGE
-//-----------------spotify connection ------------------------
+//----------------------------- Spotify related functions -----------------------------------------//
+
 
 // Configure Spotify Strategy
 passport.use(
@@ -1089,7 +1093,6 @@ Return the result in JSON format **without any code formatting or code fences**,
       playlistDescription = aiOutput.description || '';
     } catch (err) {
       console.error('Error parsing AI response:', err);
-      // If parsing fails, use default values
     }
 
     // Create a new playlist in Spotify with the AI-generated title and description
@@ -1174,15 +1177,6 @@ app.get('/spotify/status', isAuthenticated, async (req, res) => {
   }
 });
 
-// Dashboard route (protected)
-app.get('/dashboard', isAuthenticated, (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'chatApplication.html'));
-});
-
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`Server started on http://localhost:${PORT}`);
-});
 
 //------------------------- lastfm  proxy--------------------------------
 app.get('/api/lastfm/tracks', async (req, res) => {
@@ -1324,4 +1318,17 @@ app.post('/conversations/:conversationId/playlist', isAuthenticated, async (req,
     console.error('Error adding song to playlist:', err);
     res.status(500).json({ error: 'Server error' });
   }
+});
+
+
+
+//----------------------- Connection --------------------------------- //
+// Dashboard route (protected)
+app.get('/dashboard', isAuthenticated, (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'chatApplication.html'));
+});
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server started on http://localhost:${PORT}`);
 });

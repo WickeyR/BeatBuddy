@@ -1,3 +1,5 @@
+//loginScript.js: Apply styling and login functionality to the main login screen
+
 const imageUrl = [
   "https://lastfm.freetls.fastly.net/i/u/300x300/16068ad3cd46f8fdfa67c697b0aef9e7.png",
   "https://lastfm.freetls.fastly.net/i/u/300x300/86fa0d410ba70ada74d22cf4b690b05b.png",
@@ -276,7 +278,7 @@ const imageUrl = [
 
 /**
  * Display images from the imageUrl array
- * @param {number} [limit=100] - Optional. The number of unique images to display
+ * @param {number} [limit=100]
  */
 function displayImages(limit = 100) {
   try {
@@ -288,20 +290,19 @@ function displayImages(limit = 100) {
     // Select the container where images will be appended
     const backgroundContainer = document.querySelector('.background-images');
 
-    // Clear any existing images in the container (optional)
     backgroundContainer.innerHTML = '';
 
     // Iterate over the limitedImageUrls array and create image elements
     limitedImageUrls.forEach((url, index) => {
       // Create a div to wrap the img (optional, for styling purposes)
       const div = document.createElement('div');
-      div.classList.add('image-wrapper'); // Add a class for potential CSS styling
+      div.classList.add('image-wrapper'); 
 
       // Create the img element
       const img = document.createElement('img');
       img.src = url;
       img.alt = `Image ${index + 1} from Last.fm`;
-      img.loading = 'lazy'; // Enable lazy loading for performance
+      img.loading = 'lazy';
 
       // Append the img to the div
       div.appendChild(img);
@@ -331,4 +332,4 @@ function displayImages(limit = 100) {
 }
 
 // Initialize and call the function to display images
-displayImages(200); // Display 50 unique images, resulting in 100 total (including duplicates)
+displayImages(200); 
