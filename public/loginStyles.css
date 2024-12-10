@@ -1,258 +1,260 @@
 /* Base styles */
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    overflow: hidden;
-    font-family: 'Outfit', sans-serif;
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+  font-family: "Outfit", sans-serif;
 }
 
 /* Background image grid */
 .background-images {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(20%, 1fr));
-    grid-gap: 0;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 1200%;
-    z-index: 1;
-    animation: scrollUp 120s linear infinite;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(20%, 1fr));
+  grid-gap: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1200%;
+  z-index: 1;
+  animation: scrollUp 120s linear infinite;
 }
 
 .background-images div {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1 / 1;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
 }
 
 .background-images img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.3;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.3;
 }
 
 /* Scrolling animation */
 @keyframes scrollUp {
-    0% {
-        transform: translateY(0);
-    }
-    100% {
-        transform: translateY(-50%);
-    }
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
 }
 
 /* Overlay and form */
 .login-page {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
 .overlay {
-    position: relative;
-    z-index: 1;
-    background: linear-gradient(180deg, #fbfafb 0%, #ffffff 100%);
-    width: 400px;
-    padding: 30px;
-    text-align: center;
-    border-radius: 16px;
-    box-shadow: 0 0 30px rgba(205, 198, 219, 0.3);
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(180deg, #fbfafb 0%, #ffffff 100%);
+  width: 400px;
+  padding: 30px;
+  text-align: center;
+  border-radius: 16px;
+  box-shadow: 0 0 30px rgba(205, 198, 219, 0.3);
 }
 
-.website-title{
-    font-size: 30px;
-    font-weight: 300;
-    padding-bottom: 0px;
-    margin: 0;
-    margin-bottom: 5px;
+.website-title {
+  font-size: 30px;
+  font-weight: 300;
+  padding-bottom: 0px;
+  margin: 0;
+  margin-bottom: 5px;
 }
 
-.website-tagline{
-    font-size: 15px;
-    font-weight: 200;
-    margin: 0px;
-    margin-bottom: 30px;
-    padding-bottom: 30px;
+.website-tagline {
+  font-size: 15px;
+  font-weight: 200;
+  margin: 0px;
+  margin-bottom: 30px;
+  padding-bottom: 30px;
 }
 
 .form-title {
-    font-size: 20px;
-    font-weight: 500;
-    margin: 0px;
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0px;
 }
 
 .input-container {
-    margin-bottom: 20px;
-    text-align: left;
-    max-width: 80vh;
+  margin-bottom: 20px;
+  text-align: left;
+  max-width: 80vh;
 }
 
 .input-label {
-    display: block;
-    font-size: 14px;
-    margin-bottom: 5px;
-    font-weight: 500;
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+  font-weight: 500;
 }
 
 .icon-image {
-    display: block;
-    margin: 0 auto 20px; /* Center the image and add bottom spacing */
-    width: 60px; /* Set a smaller size for the image */
-    height: auto; /* Maintain aspect ratio */
+  display: block;
+  margin: 0 auto 20px; /* Center the image and add bottom spacing */
+  width: 60px; /* Set a smaller size for the image */
+  height: auto; /* Maintain aspect ratio */
 }
 
 input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #e7e7e7;
-    font-size: 14px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e7e7e7;
+  font-size: 14px;
 }
 
 .submit-button {
-    text-transform: uppercase;
-    background: #000000;
-    width: 100%;
-    border: none;
-    padding: 15px;
-    color: #ffffff;
-    font-size: 14px;
-    border-radius: 8px;
-    transition: background 0.3s ease;
-    cursor: pointer;
+  text-transform: uppercase;
+  background: #000000;
+  width: 100%;
+  border: none;
+  padding: 15px;
+  color: #ffffff;
+  font-size: 14px;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+  cursor: pointer;
 }
 
 .submit-button:hover {
-    background: #333333;
+  background: #333333;
 }
 
 .login-prompt {
-    margin-top: 20px;
-    font-size: 14px;
+  margin-top: 20px;
+  font-size: 14px;
 }
 
 .login-link {
-    color: #9c6fff;
-    font-weight: 600;
-    text-decoration: underline;
+  color: #9c6fff;
+  font-weight: 600;
+  text-decoration: underline;
 }
 
 /* Media Queries */
 
 /* Medium screens (tablets, etc.) */
 @media screen and (max-width: 1400px) {
-    .background-images {
-        grid-template-columns: repeat(auto-fill, minmax(25%, 1fr));
-    }
+  .background-images {
+    grid-template-columns: repeat(auto-fill, minmax(25%, 1fr));
+  }
 }
 
 /* Small screens (landscape phones, etc.) */
 @media screen and (max-width: 900px) {
-    .background-images {
-        grid-template-columns: repeat(auto-fill, minmax(50%, 1fr)); /* Two per row */
-    }
+  .background-images {
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(50%, 1fr)
+    ); /* Two per row */
+  }
 }
 
 /* Mobile devices */
 @media screen and (max-width: 600px) {
-    /* Adjust grid for background images to have two per row */
-    .background-images {
-        grid-template-columns: repeat(2, 1fr); /* Exactly two per row */
-        height: 600%; /* Adjust height if necessary */
-        animation: scrollUp 60s linear infinite; 
-    }
-    
-    /* Scale up the login overlay */
-    .overlay {
-        width: 90%; /* Increase form width to 90% of the screen */
-        padding: 20px; /* Adjust padding for smaller screens */
-    }
-    
-    .website-title {
-        font-size: 24px; 
-    }
-    
-    .website-tagline {
-        font-size: 14px; /* Adjust tagline size */
-    }
-    
-    .form-title {
-        font-size: 18px; /* Adjust form title size */
-    }
-    
-    .input-container {
-        margin-bottom: 15px; /* Adjust spacing between inputs */
-        max-width: 80vh;
+  /* Adjust grid for background images to have two per row */
+  .background-images {
+    grid-template-columns: repeat(2, 1fr); /* Exactly two per row */
+    height: 600%; /* Adjust height if necessary */
+    animation: scrollUp 60s linear infinite;
+  }
 
-    }
-    
-    input {
-        padding: 12px; /* Adjust padding for better touch support */
-        font-size: 16px; /* Increase font size for readability */
-    }
-    
-    .submit-button {
-        padding: 18px; /* Larger button for easier tapping */
-        font-size: 16px; /* Increase font size */
-    }
-    
-    .login-prompt {
-        font-size: 12px; /* Adjust font size for prompt text */
-    }
-    
-    .icon-image {
-        width: 50px; /* Adjust icon size */
-        margin-bottom: 15px; /* Adjust spacing */
-    }
+  /* Scale up the login overlay */
+  .overlay {
+    width: 90%; /* Increase form width to 90% of the screen */
+    padding: 20px; /* Adjust padding for smaller screens */
+  }
+
+  .website-title {
+    font-size: 24px;
+  }
+
+  .website-tagline {
+    font-size: 14px; /* Adjust tagline size */
+  }
+
+  .form-title {
+    font-size: 18px; /* Adjust form title size */
+  }
+
+  .input-container {
+    margin-bottom: 15px; /* Adjust spacing between inputs */
+    max-width: 80vh;
+  }
+
+  input {
+    padding: 12px; /* Adjust padding for better touch support */
+    font-size: 16px; /* Increase font size for readability */
+  }
+
+  .submit-button {
+    padding: 18px; /* Larger button for easier tapping */
+    font-size: 16px; /* Increase font size */
+  }
+
+  .login-prompt {
+    font-size: 12px; /* Adjust font size for prompt text */
+  }
+
+  .icon-image {
+    width: 50px; /* Adjust icon size */
+    margin-bottom: 15px; /* Adjust spacing */
+  }
 }
 
 /* Extra small screens (portrait phones, etc.) */
 @media screen and (max-width: 390px) {
-    /* Further adjustments if necessary */
-    .background-images {
-        grid-template-columns: repeat(2, 1fr); /* Ensure two per row */
-        height: 400%; /* Further adjust height */
-    }
-    
-    .overlay {
-        padding: 15px; /* Further adjust padding */
-    }
-    
-    .website-title {
-        font-size: 20px;
-    }
-    
-    .website-tagline {
-        font-size: 12px;
-    }
-    
-    .form-title {
-        font-size: 16px;
-    }
-    .input-container{
-        max-width: 50vh;
-    }
+  /* Further adjustments if necessary */
+  .background-images {
+    grid-template-columns: repeat(2, 1fr); /* Ensure two per row */
+    height: 400%; /* Further adjust height */
+  }
 
-    
-    .submit-button {
-        font-size: 14px;
-    }
-    
-    .login-prompt {
-        font-size: 10px;
-    }
-    
-    .icon-image {
-        width: 40px;
-        margin-bottom: 10px;
-    }
+  .overlay {
+    padding: 15px; /* Further adjust padding */
+  }
+
+  .website-title {
+    font-size: 20px;
+  }
+
+  .website-tagline {
+    font-size: 12px;
+  }
+
+  .form-title {
+    font-size: 16px;
+  }
+  .input-container {
+    max-width: 50vh;
+  }
+
+  .submit-button {
+    font-size: 14px;
+  }
+
+  .login-prompt {
+    font-size: 10px;
+  }
+
+  .icon-image {
+    width: 40px;
+    margin-bottom: 10px;
+  }
 }

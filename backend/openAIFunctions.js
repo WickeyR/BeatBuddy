@@ -2,329 +2,335 @@
 
 const functionDefinitions = [
   {
-    name: 'searchTrack',
-    description: 'Searches for tracks based on a song title.',
+    name: "searchTrack",
+    description: "Searches for tracks based on a song title.",
     parameters: {
-      type: 'object',
+      type: "object",
       properties: {
         apiKey: {
-          type: 'string',
-          description: 'The Last.fm API key required for authentication.',
+          type: "string",
+          description: "The Last.fm API key required for authentication.",
         },
         songTitle: {
-          type: 'string',
-          description: 'The title of the song to search for.',
+          type: "string",
+          description: "The title of the song to search for.",
         },
         limit: {
-          type: 'integer',
-          description: 'The number of tracks to return (default is 5).',
+          type: "integer",
+          description: "The number of tracks to return (default is 5).",
           default: 5,
         },
       },
-      required: ['apiKey', 'songTitle'],
+      required: ["apiKey", "songTitle"],
     },
   },
   {
-    name: 'getTrackInfo',
-    description: 'Retrieves detailed information about a specific track.',
+    name: "getTrackInfo",
+    description: "Retrieves detailed information about a specific track.",
     parameters: {
-      type: 'object',
+      type: "object",
       properties: {
         apiKey: {
-          type: 'string',
-          description: 'The Last.fm API key required for authentication.',
+          type: "string",
+          description: "The Last.fm API key required for authentication.",
         },
         artist: {
-          type: 'string',
-          description: 'The name of the artist.',
+          type: "string",
+          description: "The name of the artist.",
         },
         songTitle: {
-          type: 'string',
-          description: 'The title of the song.',
+          type: "string",
+          description: "The title of the song.",
         },
       },
-      required: ['apiKey', 'artist', 'songTitle'],
+      required: ["apiKey", "artist", "songTitle"],
     },
   },
   {
-    name: 'getRelatedTracks',
-    description: 'Searches for similar tracks, returns ONLY the name of the song and the artist.',
+    name: "getRelatedTracks",
+    description:
+      "Searches for similar tracks, returns ONLY the name of the song and the artist.",
     parameters: {
-      type: 'object',
+      type: "object",
       properties: {
         apiKey: {
-          type: 'string',
-          description: 'The Last.fm API key required for authentication.',
+          type: "string",
+          description: "The Last.fm API key required for authentication.",
         },
         artist: {
-          type: 'string',
-          description: 'The name of the artist.',
+          type: "string",
+          description: "The name of the artist.",
         },
         songTitle: {
-          type: 'string',
-          description: 'The title of the song to search for.',
+          type: "string",
+          description: "The title of the song to search for.",
         },
         limit: {
-          type: 'integer',
-          description: 'The number of tracks to return (default is 5).',
+          type: "integer",
+          description: "The number of tracks to return (default is 5).",
           default: 5,
         },
       },
-      required: ['apiKey', 'artist', 'songTitle'],
+      required: ["apiKey", "artist", "songTitle"],
     },
   },
   {
-    name: 'getTagsTopTracks',
-    description: 'Search the top tracks related to a particular mood/genre/tag. Returns ONLY the name of the song and the artist.',
+    name: "getTagsTopTracks",
+    description:
+      "Search the top tracks related to a particular mood/genre/tag. Returns ONLY the name of the song and the artist.",
     parameters: {
-      type: 'object',
+      type: "object",
       properties: {
         apiKey: {
-          type: 'string',
-          description: 'The Last.fm API key required for authentication.',
+          type: "string",
+          description: "The Last.fm API key required for authentication.",
         },
         tag: {
-          type: 'string',
-          description: 'The tag related to a track.',
+          type: "string",
+          description: "The tag related to a track.",
         },
         limit: {
-          type: 'integer',
-          description: 'The number of tracks to return (default is 5).',
+          type: "integer",
+          description: "The number of tracks to return (default is 5).",
           default: 5,
         },
       },
-      required: ['apiKey', 'tag'],
+      required: ["apiKey", "tag"],
     },
   },
   {
-    name: 'getTagsTopArtists',
-    description: 'Search the top artists related to a particular mood/genre/tag.',
+    name: "getTagsTopArtists",
+    description:
+      "Search the top artists related to a particular mood/genre/tag.",
     parameters: {
-      type: 'object',
+      type: "object",
       properties: {
         apiKey: {
-          type: 'string',
-          description: 'The Last.fm API key required for authentication.',
+          type: "string",
+          description: "The Last.fm API key required for authentication.",
         },
         tag: {
-          type: 'string',
-          description: 'The tag related to an artist.',
+          type: "string",
+          description: "The tag related to an artist.",
         },
         limit: {
-          type: 'integer',
-          description: 'The number of artists to return (default is 5).',
+          type: "integer",
+          description: "The number of artists to return (default is 5).",
           default: 5,
         },
       },
-      required: ['apiKey', 'tag'],
+      required: ["apiKey", "tag"],
     },
   },
   {
-      name: 'searchAlbum',
-      description: 'Search for albums of the title provided',
-      parameters: {
-        type: 'object',
-        properties: {
-          apiKey: {
-              type: 'string',
-              description: 'The Last.fm API key required for authentication.',
-            },
-          albumTitle: {
-            type: 'string',
-            description: 'The title of the album.',
-          },
-          
-          limit: {
-            type: 'integer',
-            description: 'The number of tracks to return (default is 5).',
-            default: 5,
-          },
-        },
-        required: ['api_key', 'albumTitle'],
-      },
-    },
-  {
-      name: 'getAlbumInfo',
-      description: 'Search for information about a particular album by an artist',
-      parameters: {
-        type: 'object',
-        properties: {
-          apiKey: {
-              type: 'string',
-              description: 'The Last.fm API key required for authentication.',
-            },
-          artist: {
-            type: 'string',
-            description: 'The artist of the album.',
-          },
-          albumTitle: {
-            type: 'string',
-            description: 'The title of the album.',
-          },
-        },
-        required: ['api_key', 'artist', 'albumTitle'],
-      },
-    },
-  {
-    name: 'getChartTopArtists',
-    description: 'Search and return the name of the current top charting artists.',
+    name: "searchAlbum",
+    description: "Search for albums of the title provided",
     parameters: {
-      type: 'object',
+      type: "object",
       properties: {
         apiKey: {
-          type: 'string',
-          description: 'The Last.fm API key required for authentication.',
+          type: "string",
+          description: "The Last.fm API key required for authentication.",
         },
+        albumTitle: {
+          type: "string",
+          description: "The title of the album.",
+        },
+
         limit: {
-          type: 'integer',
-          description: 'The number of artists to return (default is 5).',
+          type: "integer",
+          description: "The number of tracks to return (default is 5).",
           default: 5,
         },
       },
-      required: ['apiKey'],
+      required: ["api_key", "albumTitle"],
     },
   },
   {
-    name: 'getChartTopTags',
-    description: 'Search and return the name of the current top genres.',
+    name: "getAlbumInfo",
+    description: "Search for information about a particular album by an artist",
     parameters: {
-      type: 'object',
+      type: "object",
       properties: {
         apiKey: {
-          type: 'string',
-          description: 'The Last.fm API key required for authentication.',
+          type: "string",
+          description: "The Last.fm API key required for authentication.",
         },
-        limit: {
-          type: 'integer',
-          description: 'The number of genres to return (default is 5).',
-          default: 5,
+        artist: {
+          type: "string",
+          description: "The artist of the album.",
+        },
+        albumTitle: {
+          type: "string",
+          description: "The title of the album.",
         },
       },
-      required: ['apiKey'],
+      required: ["api_key", "artist", "albumTitle"],
     },
   },
   {
-    name: 'getChartTopTracks',
-    description: 'Search and return the name of the current top charting tracks.',
+    name: "getChartTopArtists",
+    description:
+      "Search and return the name of the current top charting artists.",
     parameters: {
-      type: 'object',
+      type: "object",
       properties: {
         apiKey: {
-          type: 'string',
-          description: 'The Last.fm API key required for authentication.',
+          type: "string",
+          description: "The Last.fm API key required for authentication.",
         },
         limit: {
-          type: 'integer',
-          description: 'The number of tracks to return (default is 5).',
+          type: "integer",
+          description: "The number of artists to return (default is 5).",
           default: 5,
         },
       },
-      required: ['apiKey'],
+      required: ["apiKey"],
+    },
+  },
+  {
+    name: "getChartTopTags",
+    description: "Search and return the name of the current top genres.",
+    parameters: {
+      type: "object",
+      properties: {
+        apiKey: {
+          type: "string",
+          description: "The Last.fm API key required for authentication.",
+        },
+        limit: {
+          type: "integer",
+          description: "The number of genres to return (default is 5).",
+          default: 5,
+        },
+      },
+      required: ["apiKey"],
+    },
+  },
+  {
+    name: "getChartTopTracks",
+    description:
+      "Search and return the name of the current top charting tracks.",
+    parameters: {
+      type: "object",
+      properties: {
+        apiKey: {
+          type: "string",
+          description: "The Last.fm API key required for authentication.",
+        },
+        limit: {
+          type: "integer",
+          description: "The number of tracks to return (default is 5).",
+          default: 5,
+        },
+      },
+      required: ["apiKey"],
     },
   },
 
-      {
-        name: 'printPlaylist',
-        description: 'Prints ONLY the song title and the artist of a song',
-        parameters: {
-          type: 'object',
-          properties: {},
-        },
-      }, 
-      {
-        name: 'addToPlaylist',
-        description: 'Adds a song to the current conversation’s playlist.',
-        parameters: {
-          type: 'object',
-          properties: {
-            songTitle: { type: 'string', description: 'Title of the song.' },
-            artist: { type: 'string', description: 'Artist of the song.' },
+  {
+    name: "printPlaylist",
+    description: "Prints ONLY the song title and the artist of a song",
+    parameters: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
+    name: "addToPlaylist",
+    description: "Adds a song to the current conversation’s playlist.",
+    parameters: {
+      type: "object",
+      properties: {
+        songTitle: { type: "string", description: "Title of the song." },
+        artist: { type: "string", description: "Artist of the song." },
+      },
+      required: ["songTitle", "artist"],
+    },
+  },
+  {
+    name: "addMultipleToPlaylist",
+    description: "Adds multiple songs to the current conversation’s playlist.",
+    parameters: {
+      type: "object",
+      properties: {
+        songs: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              songTitle: { type: "string", description: "Title of the song." },
+              artist: { type: "string", description: "Artist of the song." },
+            },
+            required: ["songTitle", "artist"],
           },
-          required: ['songTitle', 'artist'],
+          description:
+            "List of songs to add, each with a song title and artist.",
         },
       },
-      {
-        name: 'addMultipleToPlaylist',
-        description: 'Adds multiple songs to the current conversation’s playlist.',
-        parameters: {
-          type: 'object',
-          properties: {
-            songs: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  songTitle: { type: 'string', description: 'Title of the song.' },
-                  artist: { type: 'string', description: 'Artist of the song.' },
-                },
-                required: ['songTitle', 'artist'],
-              },
-              description: 'List of songs to add, each with a song title and artist.',
+      required: ["songs"],
+    },
+  },
+  {
+    name: "deleteFromPlaylist",
+    description: "Deletes a song from the current conversation’s playlist.",
+    parameters: {
+      type: "object",
+      properties: {
+        songTitle: { type: "string", description: "Title of the song." },
+        artist: { type: "string", description: "Artist of the song." },
+      },
+      required: ["songTitle", "artist"],
+    },
+  },
+  {
+    name: "deleteMultipleFromPlaylist",
+    description:
+      "Deletes multiple songs from the current conversation’s playlist.",
+    parameters: {
+      type: "object",
+      properties: {
+        songs: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              songTitle: { type: "string", description: "Title of the song." },
+              artist: { type: "string", description: "Artist of the song." },
             },
+            required: ["songTitle", "artist"],
           },
-          required: ['songs'],
+          description:
+            "List of songs to delete, each with a song title and artist.",
         },
       },
-      {
-        name: 'deleteFromPlaylist',
-        description: 'Deletes a song from the current conversation’s playlist.',
-        parameters: {
-          type: 'object',
-          properties: {
-            songTitle: { type: 'string', description: 'Title of the song.' },
-            artist: { type: 'string', description: 'Artist of the song.' },
-          },
-          required: ['songTitle', 'artist'],
+      required: ["songs"],
+    },
+  },
+  {
+    name: "buildPlaylist",
+    description:
+      "Builds a playlist of 10 songs based on a specific genre or song. If neither is specified, uses the user's favorite genres.",
+    parameters: {
+      type: "object",
+      properties: {
+        genre: {
+          type: "string",
+          description: "The genre to base the playlist on.",
+        },
+        songTitle: {
+          type: "string",
+          description: "The song title to base the playlist on.",
+        },
+        artist: {
+          type: "string",
+          description: "The artist of the song to base the playlist on.",
         },
       },
-      {
-        name: 'deleteMultipleFromPlaylist',
-        description: 'Deletes multiple songs from the current conversation’s playlist.',
-        parameters: {
-          type: 'object',
-          properties: {
-            songs: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  songTitle: { type: 'string', description: 'Title of the song.' },
-                  artist: { type: 'string', description: 'Artist of the song.' },
-                },
-                required: ['songTitle', 'artist'],
-              },
-              description: 'List of songs to delete, each with a song title and artist.',
-            },
-          },
-          required: ['songs'],
-        },
-      },
-      {
-        name: 'buildPlaylist',
-        description: 'Builds a playlist of 10 songs based on a specific genre or song. If neither is specified, uses the user\'s favorite genres.',
-        parameters: {
-          type: 'object',
-          properties: {
-            genre: {
-              type: 'string',
-              description: 'The genre to base the playlist on.',
-            },
-            songTitle: {
-              type: 'string',
-              description: 'The song title to base the playlist on.',
-            },
-            artist: {
-              type: 'string',
-              description: 'The artist of the song to base the playlist on.',
-            },
-          },
-          required: [],
-        },
-      },
-      
-      
+      required: [],
+    },
+  },
 ];
-
 
 /**
  * Sanitizes messages before passing them to OpenAI API
@@ -332,28 +338,26 @@ const functionDefinitions = [
  * @returns {Array} Array of sanitized messages
  */
 function sanitizeMessages(messages) {
-    return messages.map((msg) => {
-      let sanitizedMsg = { role: msg.role };
-  
-      if (msg.content !== undefined && msg.content !== null) {
-        sanitizedMsg.content = msg.content;
-      }
-  
-      if (msg.name) {
-        sanitizedMsg.name = msg.name;
-      }
-  
-      if (msg.function_call) {
-        sanitizedMsg.function_call = msg.function_call;
-      }
-  
-      return sanitizedMsg;
-    });
-  }
+  return messages.map((msg) => {
+    let sanitizedMsg = { role: msg.role };
 
+    if (msg.content !== undefined && msg.content !== null) {
+      sanitizedMsg.content = msg.content;
+    }
 
+    if (msg.name) {
+      sanitizedMsg.name = msg.name;
+    }
 
-  module.exports = {
-    functionDefinitions,
-    sanitizeMessages
-  };
+    if (msg.function_call) {
+      sanitizedMsg.function_call = msg.function_call;
+    }
+
+    return sanitizedMsg;
+  });
+}
+
+module.exports = {
+  functionDefinitions,
+  sanitizeMessages,
+};

@@ -2,362 +2,362 @@
 *,
 *::before,
 *::after {
-    box-sizing: border-box; 
+  box-sizing: border-box;
 }
 
 body {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    overflow-x: hidden; /* Prevent horizontal scrolling */
-    background: white;
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  background: white;
 }
 
 /* 2. SignUp Container */
 .SignUp {
-    width: 100%;
-    min-height: 100vh; /* Ensure it covers the full viewport height */
-    background: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px; 
+  width: 100%;
+  min-height: 100vh; /* Ensure it covers the full viewport height */
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
 }
 
 /* 3. Icon Image */
 .icon-image {
-    display: block;
-    margin: 0 auto 20px;
-    width: 80px;
-    max-width: 100%; /* Ensure it doesn't exceed the container's width */
-    height: auto; /* Maintain aspect ratio */
+  display: block;
+  margin: 0 auto 20px;
+  width: 80px;
+  max-width: 100%; /* Ensure it doesn't exceed the container's width */
+  height: auto; /* Maintain aspect ratio */
 }
 
 /* 4. Content Wrapper */
 .Content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 48px;
-    text-align: center;
-    width: 100%;
-    max-width: 578px; /* Set a max-width for larger screens */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  text-align: center;
+  width: 100%;
+  max-width: 578px; /* Set a max-width for larger screens */
 }
 
 /* 5. Header Frame */
 .Frame245 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
 .sign-up-header {
-    color: #333333;
-    font-size: 32px;
-    font-weight: 500;
-    margin: 0; /* Remove default margin */
-    word-wrap: break-word; /* Prevent long words from overflowing */
+  color: #333333;
+  font-size: 32px;
+  font-weight: 500;
+  margin: 0; /* Remove default margin */
+  word-wrap: break-word; /* Prevent long words from overflowing */
 }
 
 /* 6. Form Frame */
 .Frame254 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 40px;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  width: 100%;
 }
 
 /* 7. Basic Information Section */
 .BasicInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
 }
 
 /* 8. Text Fields */
 .TextField {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
 }
 
 .Label {
-    color: #666666;
-    font-size: 16px;
-    margin-bottom: 4px;
+  color: #666666;
+  font-size: 16px;
+  margin-bottom: 4px;
 }
 
 .Input {
-    width: 100%;
-    max-width: 578px;
-    height: 56px;
-    border: 1px solid rgba(102, 102, 102, 0.35);
-    border-radius: 12px;
-    padding: 0 24px;
-    font-size: 16px;
+  width: 100%;
+  max-width: 578px;
+  height: 56px;
+  border: 1px solid rgba(102, 102, 102, 0.35);
+  border-radius: 12px;
+  padding: 0 24px;
+  font-size: 16px;
 }
 
 .PasswordContainer {
-    position: relative;
+  position: relative;
 }
 
 .PasswordHideSee {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(102, 102, 102, 0.80);
-    cursor: pointer;
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(102, 102, 102, 0.8);
+  cursor: pointer;
 }
 
 .ErrorMessage {
-    color: #666666;
-    font-size: 14px;
-    margin-top: 4px;
+  color: #666666;
+  font-size: 14px;
+  margin-top: 4px;
 }
 
 /* 9. Genre Selection */
 .GenreSelection {
-    text-align: center;
-    width: 100%;
-    max-width: 578px;
+  text-align: center;
+  width: 100%;
+  max-width: 578px;
 }
 
 .CheckboxContainer {
-    position: relative;
-    width: 100%;
-    max-height: 180px; /* Set max height for the container */
-    border: 1px solid rgba(102, 102, 102, 0.35);
-    border-radius: 12px;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 8px;
+  position: relative;
+  width: 100%;
+  max-height: 180px; /* Set max height for the container */
+  border: 1px solid rgba(102, 102, 102, 0.35);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
 }
 
 .ScrollableCheckboxes {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Three columns for genres */
-    gap: 8px;
-    max-height: 150px; /* Adjust to leave padding */
-    overflow-y: auto; /* Enable vertical scrolling */
-    padding: 8px;
-    width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Three columns for genres */
+  gap: 8px;
+  max-height: 150px; /* Adjust to leave padding */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding: 8px;
+  width: 100%;
 }
 
 /* Hide the scroll bar */
 .ScrollableCheckboxes::-webkit-scrollbar {
-    display: none; /* Hide the scrollbar */
+  display: none; /* Hide the scrollbar */
 }
 .ScrollableCheckboxes {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .CustomCheckbox {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 16px;
-    color: #666666;
-    cursor: pointer;
-    position: relative;
-    padding: 8px;
-    border: 1px solid rgba(102, 102, 102, 0.35);
-    border-radius: 8px;
-    transition: background-color 0.3s, border-color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  color: #666666;
+  cursor: pointer;
+  position: relative;
+  padding: 8px;
+  border: 1px solid rgba(102, 102, 102, 0.35);
+  border-radius: 8px;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .CustomCheckbox input {
-    display: none; /* Hide the default checkbox */
+  display: none; /* Hide the default checkbox */
 }
 
 .CustomCheckbox span {
-    color: #333333;
-    font-size: 16px;
-    font-weight: 500;
+  color: #333333;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .CustomCheckbox:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    border-color: #1DB954;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: #1db954;
 }
 
 .CustomCheckbox input:checked + span {
-    color: #1DB954; /* Highlight text when checked */
-    font-weight: bold;
+  color: #1db954; /* Highlight text when checked */
+  font-weight: bold;
 }
 
 /* 10. Action Frame */
 .Frame248 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    width: 100%;
-    max-width: 578px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 578px;
 }
 
 /* 11. Buttons */
 .Button {
-    width: 100%;
-    max-width: 578px;
-    height: 64px;
-    background: #111111;
-    border-radius: 40px;
-    color: white;
-    font-size: 22px;
-    font-weight: 500;
-    opacity: 0.25;
-    cursor: not-allowed;
-    border: none;
-    transition: opacity 0.3s, cursor 0.3s;
+  width: 100%;
+  max-width: 578px;
+  height: 64px;
+  background: #111111;
+  border-radius: 40px;
+  color: white;
+  font-size: 22px;
+  font-weight: 500;
+  opacity: 0.25;
+  cursor: not-allowed;
+  border: none;
+  transition: opacity 0.3s, cursor 0.3s;
 }
 
 .Button:enabled {
-    opacity: 1;
-    cursor: pointer;
+  opacity: 1;
+  cursor: pointer;
 }
 
 .SpotifyButton {
-    width: 100%;
-    max-width: 578px;
-    height: 56px;
-    background: #1DB954;
-    color: white;
-    font-size: 18px;
-    font-weight: 500;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+  width: 100%;
+  max-width: 578px;
+  height: 56px;
+  background: #1db954;
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .SpotifyButton:hover {
-    background: #1AA34A;
+  background: #1aa34a;
 }
 
 /* 12. Login Link */
 .HaveAnAccountLogin {
-    font-size: 16px;
-    color: #333333;
+  font-size: 16px;
+  color: #333333;
 }
 
 .LoginLink {
-    color: #111111;
-    text-decoration: underline;
-    margin-left: 5px;
-    cursor: pointer;
+  color: #111111;
+  text-decoration: underline;
+  margin-left: 5px;
+  cursor: pointer;
 }
 
 /* 13. Responsive Styles */
 
 /* Medium Devices (Tablets, 768px and below) */
 @media screen and (max-width: 768px) {
-    .SignUp {
-        padding: 16px;
-        height: auto; /* Allow content to adjust to the screen size */
-    }
+  .SignUp {
+    padding: 16px;
+    height: auto; /* Allow content to adjust to the screen size */
+  }
 
-    .Content {
-        gap: 32px; /* Reduce spacing between elements */
-    }
+  .Content {
+    gap: 32px; /* Reduce spacing between elements */
+  }
 
-    .icon-image {
-        width: 60px; /* Smaller icon size for mobile */
-    }
+  .icon-image {
+    width: 60px; /* Smaller icon size for mobile */
+  }
 
-    .sign-up-header {
-        font-size: 24px; /* Reduce font size for mobile */
-    }
+  .sign-up-header {
+    font-size: 24px; /* Reduce font size for mobile */
+  }
 
-    /* Input fields and buttons */
-    .Input,
-    .SpotifyButton,
-    .Button {
-        width: 100%; /* Full width on smaller screens */
-        height: 48px; /* Slightly smaller height for mobile */
-        font-size: 14px; /* Adjust font size for better readability */
-    }
+  /* Input fields and buttons */
+  .Input,
+  .SpotifyButton,
+  .Button {
+    width: 100%; /* Full width on smaller screens */
+    height: 48px; /* Slightly smaller height for mobile */
+    font-size: 14px; /* Adjust font size for better readability */
+  }
 
-    .SpotifyButton {
-        font-size: 16px; /* Adjust font size */
-    }
+  .SpotifyButton {
+    font-size: 16px; /* Adjust font size */
+  }
 
-    .Button {
-        height: 56px; /* Match SpotifyButton height */
-        font-size: 16px; /* Adjust font size */
-    }
+  .Button {
+    height: 56px; /* Match SpotifyButton height */
+    font-size: 16px; /* Adjust font size */
+  }
 
-    .HaveAnAccountLogin,
-    .LoginLink {
-        font-size: 14px; /* Reduce font size */
-    }
+  .HaveAnAccountLogin,
+  .LoginLink {
+    font-size: 14px; /* Reduce font size */
+  }
 
-    /* GenreSelection */
-    .GenreSelection {
-        width: 100%; /* Full width for mobile */
-    }
+  /* GenreSelection */
+  .GenreSelection {
+    width: 100%; /* Full width for mobile */
+  }
 
-    .ScrollableCheckboxes {
-        grid-template-columns: repeat(2, 1fr); /* Two columns for smaller screens */
-        gap: 4px; /* Reduce gap between checkboxes */
-        max-height: 120px; /* Adjust height for smaller screen space */
-        padding: 4px; /* Reduce padding */
-    }
+  .ScrollableCheckboxes {
+    grid-template-columns: repeat(2, 1fr); /* Two columns for smaller screens */
+    gap: 4px; /* Reduce gap between checkboxes */
+    max-height: 120px; /* Adjust height for smaller screen space */
+    padding: 4px; /* Reduce padding */
+  }
 
-    .CustomCheckbox {
-        font-size: 14px; /* Reduce font size for mobile */
-        padding: 6px; /* Adjust padding */
-    }
+  .CustomCheckbox {
+    font-size: 14px; /* Reduce font size for mobile */
+    padding: 6px; /* Adjust padding */
+  }
 
-    .Frame248 {
-        gap: 12px; /* Reduce gap between buttons */
-    }
+  .Frame248 {
+    gap: 12px; /* Reduce gap between buttons */
+  }
 
-    /* Error messages */
-    .ErrorMessage {
-        font-size: 12px; /* Smaller font size for error messages */
-    }
+  /* Error messages */
+  .ErrorMessage {
+    font-size: 12px; /* Smaller font size for error messages */
+  }
 }
 
 /* Small Devices (Portrait Phones, 480px and below) */
 @media screen and (max-width: 480px) {
-    .sign-up-header {
-        font-size: 20px;
-    }
+  .sign-up-header {
+    font-size: 20px;
+  }
 
-    .ScrollableCheckboxes {
-        grid-template-columns: repeat(2, 1fr); /* Ensure two per row */
-        max-height: 100px; /* Further adjust height */
-        padding: 4px;
-    }
+  .ScrollableCheckboxes {
+    grid-template-columns: repeat(2, 1fr); /* Ensure two per row */
+    max-height: 100px; /* Further adjust height */
+    padding: 4px;
+  }
 
-    .CustomCheckbox {
-        font-size: 14px;
-        padding: 6px;
-    }
+  .CustomCheckbox {
+    font-size: 14px;
+    padding: 6px;
+  }
 }
 
 /* Extra Small Devices (Portrait Phones, 300px and below) */
 @media screen and (max-width: 300px) {
-    .sign-up-header {
-        overflow: hidden;
-        font-size: 20px;
-    }
+  .sign-up-header {
+    overflow: hidden;
+    font-size: 20px;
+  }
 
-    .ScrollableCheckboxes {
-        grid-template-columns: repeat(2, 1fr); /* Ensure two per row */
-        max-height: 100px; /* Further adjust height */
-        padding: 4px;
-    }
+  .ScrollableCheckboxes {
+    grid-template-columns: repeat(2, 1fr); /* Ensure two per row */
+    max-height: 100px; /* Further adjust height */
+    padding: 4px;
+  }
 
-    .CustomCheckbox {
-        font-size: 14px;
-        padding: 6px;
-    }
+  .CustomCheckbox {
+    font-size: 14px;
+    padding: 6px;
+  }
 }

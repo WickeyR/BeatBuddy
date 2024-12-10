@@ -1,117 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <title>BeatBuddy</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="chatApplicationStyles.css">
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="chatApplicationStyles.css" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-</head>
-<body>
+  </head>
+  <body>
     <!-- Navigation Bar -->
     <nav class="navbar fixed-top navbar-light bg-light">
-        <div class="container-fluid">
-            <a href="#" class="navbar-brand d-flex align-items-center">
-                <img src="images/BeatBuddyIcon.png" class="logo" alt="Logo" />
-                <span class="title">BeatBuddy</span>
-            </a>
-            <form id="logout-form" action="/logout" method="POST" class="form-inline">
-                <button type="submit" class="btn btn-outline-danger">Logout</button>
-            </form>
-        </div>
+      <div class="container-fluid">
+        <a href="#" class="navbar-brand d-flex align-items-center">
+          <img src="images/BeatBuddyIcon.png" class="logo" alt="Logo" />
+          <span class="title">BeatBuddy</span>
+        </a>
+        <form
+          id="logout-form"
+          action="/logout"
+          method="POST"
+          class="form-inline"
+        >
+          <button type="submit" class="btn btn-outline-danger">Logout</button>
+        </form>
+      </div>
     </nav>
 
     <!-- Main Container -->
-    <div class="container-fluid" style="padding-top: 60px;">
-        <div class="row no-gutters" style="height: calc(100vh - 60px);">
-            <!-- Chat History Sidebar -->
-            <div class="col-md-2 chat-history d-flex flex-column">
-                <h2>Chat History</h2>
-                <button id="new-chat-button" class="btn btn-block btn-secondary mb-2">New Chat</button>
-                <div class="chat-history-list-container flex-grow-1">
-                    <ul id="chat-history-list" class="list-unstyled">
-                        <!-- Chat history items will be injected here -->
-                    </ul>
-                </div>
-                <div class="chat-history-footer">
-                    <button id="delete-all-chats-button" class="btn btn-block btn-danger">Delete All Chats</button>
-                </div>
-            </div>
+    <div class="container-fluid" style="padding-top: 60px">
+      <div class="row no-gutters" style="height: calc(100vh - 60px)">
+        <!-- Chat History Sidebar -->
+        <div class="col-md-2 chat-history d-flex flex-column">
+          <h2>Chat History</h2>
+          <button id="new-chat-button" class="btn btn-block btn-secondary mb-2">
+            New Chat
+          </button>
+          <div class="chat-history-list-container flex-grow-1">
+            <ul id="chat-history-list" class="list-unstyled">
+              <!-- Chat history items will be injected here -->
+            </ul>
+          </div>
+          <div class="chat-history-footer">
+            <button
+              id="delete-all-chats-button"
+              class="btn btn-block btn-danger"
+            >
+              Delete All Chats
+            </button>
+          </div>
+        </div>
 
-            <!-- Main Chat Box -->
-            <div class="col-md-8 box d-flex flex-column">
-                <!-- Chat Messages Section -->
-                <div id="upperid" class="chat-messages">
-                    <!-- Chat messages will appear here -->
-                </div>
+        <!-- Main Chat Box -->
+        <div class="col-md-8 box d-flex flex-column">
+          <!-- Chat Messages Section -->
+          <div id="upperid" class="chat-messages">
+            <!-- Chat messages will appear here -->
+          </div>
 
-                <!-- Chat Form Section -->
-                <form id="userinputform" class="chat-form d-flex">
-                    <textarea id="userinput" class="form-control mr-2" placeholder="Your message..."></textarea>
-                    <button type="submit" class="btn btn-primary send-button" id="sendbtn">
-                        <svg aria-hidden="true" class="icon" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z">
-                            </path>
-                        </svg>
-                        <span class="sr-only">Send message</span>
-                    </button>
-                </form>
-            </div>
+          <!-- Chat Form Section -->
+          <form id="userinputform" class="chat-form d-flex">
+            <textarea
+              id="userinput"
+              class="form-control mr-2"
+              placeholder="Your message..."
+            ></textarea>
+            <button
+              type="submit"
+              class="btn btn-primary send-button"
+              id="sendbtn"
+            >
+              <svg
+                aria-hidden="true"
+                class="icon"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"
+                ></path>
+              </svg>
+              <span class="sr-only">Send message</span>
+            </button>
+          </form>
+        </div>
 
-            <!-- Chat Playlist Sidebar -->
-<div class="col-md-2 chat-playlist d-flex flex-column">
-    <div class="playlist-container flex-fill d-flex flex-column">
-        <h2>Your Playlist</h2>
-        <button id="connect-spotify-button" class="btn btn-block btn-success mb-2">
-            Connect to Spotify
-            <!-- SVG Icon -->
-        </button>
-        <div class="playlist-list-container flex-grow-1">
-            <ul id="chat-playlist-list" class="list-unstyled">
+        <!-- Chat Playlist Sidebar -->
+        <div class="col-md-2 chat-playlist d-flex flex-column">
+          <div class="playlist-container flex-fill d-flex flex-column">
+            <h2>Your Playlist</h2>
+            <button
+              id="connect-spotify-button"
+              class="btn btn-block btn-success mb-2"
+            >
+              Connect to Spotify
+              <!-- SVG Icon -->
+            </button>
+            <div class="playlist-list-container flex-grow-1">
+              <ul id="chat-playlist-list" class="list-unstyled">
                 <!-- Playlist items will be injected here -->
-            </ul>
-        </div>
-    </div>
-    <div class="divider"></div> <!-- Divider between playlist and suggestions -->
-    <div class="suggestions-container flex-fill d-flex flex-column">
-        <h2>Suggested Songs</h2>
-        <div class="suggestions-list-container flex-grow-1">
-            <ul id="suggestions-list" class="list-unstyled">
+              </ul>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <!-- Divider between playlist and suggestions -->
+          <div class="suggestions-container flex-fill d-flex flex-column">
+            <h2>Suggested Songs</h2>
+            <div class="suggestions-list-container flex-grow-1">
+              <ul id="suggestions-list" class="list-unstyled">
                 <!-- Suggested songs will be injected here -->
-            </ul>
+              </ul>
+            </div>
+          </div>
         </div>
-    </div>
-</div>
-
-        </div>
+      </div>
     </div>
 
     <!-- Popup Container -->
     <div id="popup-container" class="popup-container hidden">
-        <div class="popup">
-            <button class="popup-close popup-close-left" id="popup-close-left-button">×</button>
-            <div class="popup-content">
-                <p id="popup-message">Playlist exported to Spotify successfully!</p>
-                <a id="popup-link" href="#" target="_blank" class="popup-link">Open in Spotify</a>
-            </div>
+      <div class="popup">
+        <button
+          class="popup-close popup-close-left"
+          id="popup-close-left-button"
+        >
+          ×
+        </button>
+        <div class="popup-content">
+          <p id="popup-message">Playlist exported to Spotify successfully!</p>
+          <a id="popup-link" href="#" target="_blank" class="popup-link"
+            >Open in Spotify</a
+          >
         </div>
+      </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
-
     <script src="chatApplicationFunctions.js"></script>
 
-
     <!-- Loading Spinner -->
-<div id="loading-spinner" class="loading-spinner hidden">
-    <div class="spinner"></div>
-    <p>Building your playlist...</p>
-</div>
-
-</body>
+    <div id="loading-spinner" class="loading-spinner hidden">
+      <div class="spinner"></div>
+      <p>Building your playlist...</p>
+    </div>
+  </body>
 </html>

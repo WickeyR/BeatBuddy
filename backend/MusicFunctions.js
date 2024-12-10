@@ -1,13 +1,11 @@
 //MusicFunctions.js: Creates methods to retrieve music information from the Last.fm database, and provide functions to store the data
 
-
-
 //-----------------------------------------Imports -------------------------------------------------------
 
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
-const publicDirectory = path.join(__dirname, '..', 'public');
+const axios = require("axios");
+const fs = require("fs");
+const path = require("path");
+const publicDirectory = path.join(__dirname, "..", "public");
 //------------------------------------Album related methods----------------------------------------------
 
 /**
@@ -17,26 +15,26 @@ const publicDirectory = path.join(__dirname, '..', 'public');
  * @returns {Promise<Object>} The formatted album information
  */
 async function getAlbumInfo(artist, albumTitle, api_key) {
-  console.log('getAlbumInfo called');
+  console.log("getAlbumInfo called");
 
   // Attempt to get a response from Last.fm with provided parameters
   try {
-    const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+    const response = await axios.get("http://ws.audioscrobbler.com/2.0/", {
       params: {
-        method: 'album.getInfo',
+        method: "album.getInfo",
         api_key: api_key,
         artist: artist,
         album: albumTitle,
         autocorrect: 1,
-        format: 'json',
+        format: "json",
       },
     });
 
     //Saves the response from Last.fm and returns it
     const albumInfo = response.data;
-    return formatInformation(albumInfo, 'album');
+    return formatInformation(albumInfo, "album");
   } catch (error) {
-    console.error('Error fetching data from last.fm', error);
+    console.error("Error fetching data from last.fm", error);
     throw error;
   }
 }
@@ -48,17 +46,17 @@ async function getAlbumInfo(artist, albumTitle, api_key) {
  * @returns {Promise<Object[]>} The formatted list of searched albums
  */
 async function searchAlbum(albumTitle, limit = 5, api_key) {
-  console.log('searchAlbum called');
+  console.log("searchAlbum called");
 
   // Attempt to get a response from Last.fm with provided parameters
   try {
-    const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+    const response = await axios.get("http://ws.audioscrobbler.com/2.0/", {
       params: {
-        method: 'album.search',
+        method: "album.search",
         api_key: api_key,
         album: albumTitle,
         limit: limit,
-        format: 'json',
+        format: "json",
       },
     });
 
@@ -68,18 +66,17 @@ async function searchAlbum(albumTitle, limit = 5, api_key) {
 
     // Loop through each searched album and format it
     for (const album of searchResults) {
-      const formattedAlbum = formatInformation(album, 'album');
+      const formattedAlbum = formatInformation(album, "album");
       formattedAlbums.push(formattedAlbum);
     }
 
     // Returns the formatted list of searched albums
-    return formattedAlbums; 
-
+    return formattedAlbums;
   } catch (error) {
-    console.error('Error fetching data from Last.fm', error);
-    
+    console.error("Error fetching data from Last.fm", error);
+
     // Rethrow the error so it can be caught in server.js
-    throw error; 
+    throw error;
   }
 }
 
@@ -92,26 +89,26 @@ async function searchAlbum(albumTitle, limit = 5, api_key) {
  * @returns {Promise<Object>} The formatted track information
  */
 async function getTrackInfo(artist, songTitle, api_key) {
-  console.log('getTrackInfo called');
+  console.log("getTrackInfo called");
 
   // Attempt to get a response from Last.fm with provided parameters
   try {
-    const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+    const response = await axios.get("http://ws.audioscrobbler.com/2.0/", {
       params: {
-        method: 'track.getInfo',
+        method: "track.getInfo",
         api_key: api_key,
         artist: artist,
         track: songTitle,
         autocorrect: 1,
-        format: 'json',
+        format: "json",
       },
     });
 
     // Save the response data and return it formatted
     const trackInfo = response.data;
-    return formatInformation(trackInfo, 'track');
+    return formatInformation(trackInfo, "track");
   } catch (error) {
-    console.error('Error fetching data from last.fm', error);
+    console.error("Error fetching data from last.fm", error);
     throw error;
   }
 }
@@ -124,18 +121,18 @@ async function getTrackInfo(artist, songTitle, api_key) {
  * @returns {Promise<Object[]>} The formatted list of similar tracks
  */
 async function getRelatedTracks(artist, songTitle, limit = 5, api_key) {
-  console.log('getRelatedTracks called');
+  console.log("getRelatedTracks called");
 
   try {
-    const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+    const response = await axios.get("http://ws.audioscrobbler.com/2.0/", {
       params: {
-        method: 'track.getSimilar',
+        method: "track.getSimilar",
         api_key: api_key,
         artist: artist,
         track: songTitle,
         autocorrect: 1,
         limit: limit,
-        format: 'json',
+        format: "json",
       },
     });
 
@@ -148,42 +145,51 @@ async function getRelatedTracks(artist, songTitle, limit = 5, api_key) {
     for (const track of relatedTracks) {
       try {
         // Fetch track information to get the large image URL
-        const trackInfoResponse = await axios.get('http://ws.audioscrobbler.com/2.0/', {
-          params: {
-            method: 'track.getInfo',
-            api_key: api_key,
-            artist: track.artist.name,
-            track: track.name,
-            autocorrect: 1,
-            format: 'json',
-          },
-        });
+        const trackInfoResponse = await axios.get(
+          "http://ws.audioscrobbler.com/2.0/",
+          {
+            params: {
+              method: "track.getInfo",
+              api_key: api_key,
+              artist: track.artist.name,
+              track: track.name,
+              autocorrect: 1,
+              format: "json",
+            },
+          }
+        );
 
         const trackInfo = trackInfoResponse.data.track;
 
         const imageURL =
-          trackInfo.album?.image.find((img) => img.size === 'extralarge')?.['#text'] || '';
+          trackInfo.album?.image.find((img) => img.size === "extralarge")?.[
+            "#text"
+          ] || "";
 
         const formattedTrack = {
-          songTitle: trackInfo.name || '',
-          artist: trackInfo.artist?.name || '',
+          songTitle: trackInfo.name || "",
+          artist: trackInfo.artist?.name || "",
           imageURL: imageURL,
         };
 
         formattedTracks.push(formattedTrack);
       } catch (err) {
-        console.error('Error fetching track info for', track.name, err);
+        console.error("Error fetching track info for", track.name, err);
 
         // Fallback to the image from 'track.getSimilar' response
-        let imageURL = track.image?.find((img) => img.size === 'extralarge')?.['#text'];
+        let imageURL = track.image?.find((img) => img.size === "extralarge")?.[
+          "#text"
+        ];
         if (!imageURL) {
-          imageURL = track.image?.find((img) => img.size === 'large')?.['#text'];
+          imageURL = track.image?.find((img) => img.size === "large")?.[
+            "#text"
+          ];
         }
-        imageURL = imageURL || '';
+        imageURL = imageURL || "";
 
         const formattedTrack = {
-          songTitle: track.name || '',
-          artist: track.artist?.name || '',
+          songTitle: track.name || "",
+          artist: track.artist?.name || "",
           imageURL: imageURL,
         };
 
@@ -193,11 +199,10 @@ async function getRelatedTracks(artist, songTitle, limit = 5, api_key) {
 
     return formattedTracks;
   } catch (error) {
-    console.error('Error fetching data from Last.fm', error);
+    console.error("Error fetching data from Last.fm", error);
     throw error;
   }
 }
-
 
 /**
  * searchTrack: Returns a formatted list of tracks with the name of songTitle
@@ -206,17 +211,17 @@ async function getRelatedTracks(artist, songTitle, limit = 5, api_key) {
  * @returns {Promise<Object[]>} The formatted list of searched tracks
  */
 async function searchTrack(songTitle, limit = 5, api_key) {
-  console.log('searchTrack called');
+  console.log("searchTrack called");
 
   // Attempt to get a response from Last.fm with provided parameters
   try {
-    const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+    const response = await axios.get("http://ws.audioscrobbler.com/2.0/", {
       params: {
-        method: 'track.search',
+        method: "track.search",
         api_key: api_key,
         track: songTitle,
         limit: limit,
-        format: 'json',
+        format: "json",
       },
     });
 
@@ -227,14 +232,14 @@ async function searchTrack(songTitle, limit = 5, api_key) {
 
     // Loop through each searched track and format it
     for (const track of searchResults) {
-      const formattedTrack = formatInformation(track, 'track');
+      const formattedTrack = formatInformation(track, "track");
       formattedTracks.push(formattedTrack);
     }
 
     // Returns the formatted list of searched tracks
     return formattedTracks;
   } catch (error) {
-    console.error('Error fetching data from Last.fm', error);
+    console.error("Error fetching data from Last.fm", error);
     throw error; // Rethrow the error so it can be caught in server.js
   }
 }
@@ -248,17 +253,17 @@ async function searchTrack(songTitle, limit = 5, api_key) {
  * @returns {Promise<Object[]>} The formatted list of top tracks
  */
 async function getTagsTopTracks(tag, limit = 5, api_key) {
-  console.log('getTagsTopTracks called');
+  console.log("getTagsTopTracks called");
 
   // Attempt to get a response from Last.fm with provided parameters
   try {
-    const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+    const response = await axios.get("http://ws.audioscrobbler.com/2.0/", {
       params: {
-        method: 'tag.getTopTracks',
+        method: "tag.getTopTracks",
         api_key: api_key,
         tag: tag,
         limit: limit,
-        format: 'json',
+        format: "json",
       },
     });
 
@@ -269,14 +274,14 @@ async function getTagsTopTracks(tag, limit = 5, api_key) {
 
     // Loop through each top track and format it
     for (const track of tagResults) {
-      const formattedTrack = formatInformation(track, 'track');
+      const formattedTrack = formatInformation(track, "track");
       formattedTracks.push(formattedTrack);
     }
 
     // Returns the formatted list of top tracks
     return formattedTracks;
   } catch (error) {
-    console.error('Error fetching data from Last.fm', error);
+    console.error("Error fetching data from Last.fm", error);
     throw error;
   }
 }
@@ -288,17 +293,17 @@ async function getTagsTopTracks(tag, limit = 5, api_key) {
  * @returns {Promise<Object[]>} The formatted list of top artists
  */
 async function getTagsTopArtists(tag, limit = 5, api_key) {
-  console.log('getTagsTopArtists called');
+  console.log("getTagsTopArtists called");
 
   // Attempt to get a response from Last.fm with provided parameters
   try {
-    const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+    const response = await axios.get("http://ws.audioscrobbler.com/2.0/", {
       params: {
-        method: 'tag.getTopArtists',
+        method: "tag.getTopArtists",
         api_key: api_key,
         tag: tag,
         limit: limit,
-        format: 'json',
+        format: "json",
       },
     });
 
@@ -309,14 +314,14 @@ async function getTagsTopArtists(tag, limit = 5, api_key) {
 
     // Append the information to the formatted array
     for (const artist of tagResults) {
-      const formattedArtist = formatInformation(artist, 'artist');
+      const formattedArtist = formatInformation(artist, "artist");
       formattedArtists.push(formattedArtist);
     }
 
     // Return the formatted array
     return formattedArtists;
   } catch (error) {
-    console.error('Error fetching data from Last.fm', error);
+    console.error("Error fetching data from Last.fm", error);
     throw error;
   }
 }
@@ -329,16 +334,16 @@ async function getTagsTopArtists(tag, limit = 5, api_key) {
  * @returns {Promise<Object[]>} The formatted list of top charting artists
  */
 async function getChartTopArtists(limit = 5, api_key) {
-  console.log('getChartTopArtists called');
+  console.log("getChartTopArtists called");
 
   // Attempt to get a response from Last.fm with provided parameters
   try {
-    const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+    const response = await axios.get("http://ws.audioscrobbler.com/2.0/", {
       params: {
-        method: 'chart.getTopArtists',
+        method: "chart.getTopArtists",
         api_key: api_key,
         limit: limit,
-        format: 'json',
+        format: "json",
       },
     });
 
@@ -349,12 +354,12 @@ async function getChartTopArtists(limit = 5, api_key) {
 
     // Place the artists in the array
     for (const artist of chartResults) {
-      const formattedArtist = formatInformation(artist, 'artist');
+      const formattedArtist = formatInformation(artist, "artist");
       artists.push(formattedArtist);
     }
     return artists;
   } catch (error) {
-    console.error('Error fetching data from Last.fm', error);
+    console.error("Error fetching data from Last.fm", error);
     throw error;
   }
 }
@@ -365,16 +370,16 @@ async function getChartTopArtists(limit = 5, api_key) {
  * @returns {Promise<string[]>} The list of top charting genres
  */
 async function getChartTopTags(limit = 5, api_key) {
-  console.log('getChartTopTags called');
+  console.log("getChartTopTags called");
 
   // Attempt to get a response from Last.fm with provided parameters
   try {
-    const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+    const response = await axios.get("http://ws.audioscrobbler.com/2.0/", {
       params: {
-        method: 'chart.getTopTags',
+        method: "chart.getTopTags",
         api_key: api_key,
         limit: limit,
-        format: 'json',
+        format: "json",
       },
     });
 
@@ -389,7 +394,7 @@ async function getChartTopTags(limit = 5, api_key) {
     // Return the list
     return chartingGenres;
   } catch (error) {
-    console.error('Error fetching data from Last.fm', error);
+    console.error("Error fetching data from Last.fm", error);
     throw error;
   }
 }
@@ -400,16 +405,16 @@ async function getChartTopTags(limit = 5, api_key) {
  * @returns {Promise<Object[]>} The formatted list of top charting tracks
  */
 async function getChartTopTracks(limit = 5, api_key) {
-  console.log('getChartTopTracks called');
+  console.log("getChartTopTracks called");
 
   // Attempt to get a response from Last.fm with provided parameters
   try {
-    const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+    const response = await axios.get("http://ws.audioscrobbler.com/2.0/", {
       params: {
-        method: 'chart.getTopTracks',
+        method: "chart.getTopTracks",
         api_key: api_key,
         limit: limit,
-        format: 'json',
+        format: "json",
       },
     });
 
@@ -419,14 +424,14 @@ async function getChartTopTracks(limit = 5, api_key) {
 
     for (const track of chartTrackResults) {
       // Add the track to the list
-      const formattedChartTrack = formatInformation(track, 'track');
+      const formattedChartTrack = formatInformation(track, "track");
       chartingTracks.push(formattedChartTrack);
     }
 
     // Return the list
     return chartingTracks;
   } catch (error) {
-    console.error('Error fetching data from Last.fm', error);
+    console.error("Error fetching data from Last.fm", error);
     throw error;
   }
 }
@@ -443,22 +448,22 @@ const formatInformation = (data, dataType) => {
   // Defines a dictionary to properly store information about a particular data response from Last.fm
   let formattedData = {
     type: dataType,
-    title: 'Unknown',
-    artist: 'Unknown',
-    releaseDate: 'Unknown',
+    title: "Unknown",
+    artist: "Unknown",
+    releaseDate: "Unknown",
     topTags: [],
-    album: 'Unknown',
+    album: "Unknown",
   };
 
   // Formatting for tracks
   if (data) {
-    if (dataType === 'track') {
+    if (dataType === "track") {
       // Title formatting for tracks
       formattedData.title =
         data.name || data.track?.name || formattedData.title;
 
       // Artist formatting for tracks
-      if (typeof data.artist === 'string') {
+      if (typeof data.artist === "string") {
         formattedData.artist = data.artist;
       } else if (data.artist && data.artist.name) {
         formattedData.artist = data.artist.name;
@@ -475,21 +480,14 @@ const formatInformation = (data, dataType) => {
       // Top Tags formatting for tracks
       if (data.toptags && data.toptags.tag) {
         formattedData.topTags = data.toptags.tag.map((tag) => tag.name);
-      } else if (
-        data.track &&
-        data.track.toptags &&
-        data.track.toptags.tag
-      ) {
+      } else if (data.track && data.track.toptags && data.track.toptags.tag) {
         formattedData.topTags = data.track.toptags.tag.map((tag) => tag.name);
       }
 
       // Album formatting
       formattedData.album =
-        data.album?.title ||
-        data.track?.album?.title ||
-        formattedData.album;
-
-    } else if (dataType === 'album') {
+        data.album?.title || data.track?.album?.title || formattedData.album;
+    } else if (dataType === "album") {
       // Title formatting for albums
       formattedData.title = data.name || formattedData.title;
 
@@ -504,8 +502,7 @@ const formatInformation = (data, dataType) => {
       if (data.tags && data.tags.tag) {
         formattedData.topTags = data.tags.tag.map((tag) => tag.name);
       }
-
-    } else if (dataType === 'artist') {
+    } else if (dataType === "artist") {
       // Name formatting for artists
       formattedData.title = data.name || formattedData.title;
 
@@ -529,10 +526,10 @@ const formatInformation = (data, dataType) => {
  * @returns {Promise<Object>} The status of the operation
  */
 async function addToPlaylist(songTitle, artist = null) {
-  console.log('addToPlaylist called');
+  console.log("addToPlaylist called");
 
   // Load the current playlist
-  let playlistData = loadData('playlist.json');
+  let playlistData = loadData("playlist.json");
 
   // Check if the song is already in the playlist
   let songInPlaylist = playlistData.some(
@@ -542,8 +539,8 @@ async function addToPlaylist(songTitle, artist = null) {
   );
 
   if (songInPlaylist) {
-    console.log('Song is already in the playlist.');
-    return { status: 'Song is already in the playlist.' };
+    console.log("Song is already in the playlist.");
+    return { status: "Song is already in the playlist." };
   }
 
   // Fetch detailed track info using getTrackInfo
@@ -551,12 +548,12 @@ async function addToPlaylist(songTitle, artist = null) {
   try {
     trackInfo = await getTrackInfo(artist, songTitle);
   } catch (error) {
-    console.error('Error fetching track info:', error);
-    return { status: 'Song not found.', error: true };
+    console.error("Error fetching track info:", error);
+    return { status: "Song not found.", error: true };
   }
 
   // Add song to tracks.json if not already present
-  let trackData = loadData('tracks.json');
+  let trackData = loadData("tracks.json");
   let songInTracks = trackData.find(
     (t) =>
       t.title.toLowerCase() === songTitle.toLowerCase() &&
@@ -566,15 +563,15 @@ async function addToPlaylist(songTitle, artist = null) {
   if (!songInTracks) {
     // Add song to tracks.json
     trackData.push(trackInfo);
-    saveData(trackData, 'tracks.json');
+    saveData(trackData, "tracks.json");
   }
 
   // Add song to playlist.json
   playlistData.push(trackInfo);
-  saveData(playlistData, 'playlist.json');
+  saveData(playlistData, "playlist.json");
 
-  console.log('Song added to playlist with detailed info.');
-  return { status: 'Song added to playlist with detailed info.' };
+  console.log("Song added to playlist with detailed info.");
+  return { status: "Song added to playlist with detailed info." };
 }
 
 /**
@@ -595,7 +592,7 @@ const saveData = (data, filename) => {
 const loadData = (filename) => {
   const filePath = path.join(publicDirectory, filename);
   if (fs.existsSync(filePath)) {
-    const data = fs.readFileSync(filePath, 'utf8');
+    const data = fs.readFileSync(filePath, "utf8");
     return JSON.parse(data);
   } else {
     return [];
@@ -609,10 +606,10 @@ const loadData = (filename) => {
  * @returns {Promise<Object>} The status of the operation
  */
 async function deleteFromPlaylist(songTitle, artist = null) {
-  console.log('deleteFromPlaylist called ');
+  console.log("deleteFromPlaylist called ");
 
   // Load current playlist
-  let playlistData = loadData('playlist.json');
+  let playlistData = loadData("playlist.json");
 
   // Check if the song is already in the playlist
   let songInPlaylist = playlistData.some(
@@ -623,8 +620,8 @@ async function deleteFromPlaylist(songTitle, artist = null) {
 
   // Return none
   if (!songInPlaylist) {
-    console.log('Song is not in playlist.');
-    return { status: 'Song is not in playlist.', error: true };
+    console.log("Song is not in playlist.");
+    return { status: "Song is not in playlist.", error: true };
   }
 
   // Removes track from playlist if it exists in the playlist
@@ -637,9 +634,9 @@ async function deleteFromPlaylist(songTitle, artist = null) {
   );
 
   // Update the playlist which will now not contain 'songTitle'
-  saveData(playlistData, 'playlist.json');
-  console.log('Song removed from playlist.');
-  return { status: 'Song removed from playlist.' };
+  saveData(playlistData, "playlist.json");
+  console.log("Song removed from playlist.");
+  return { status: "Song removed from playlist." };
 }
 
 // Exports MusicFunctions to be used in other files.

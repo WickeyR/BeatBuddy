@@ -270,11 +270,8 @@ const imageUrl = [
   "https://lastfm.freetls.fastly.net/i/u/300x300/118cdb502af3929c505617d8e687e95c.png",
   "https://lastfm.freetls.fastly.net/i/u/300x300/e6d4821f6a554c7bc882a9fa75070dfe.png",
   "https://lastfm.freetls.fastly.net/i/u/300x300/106f80967620a3cb558658a5c474d819.png",
-  "https://lastfm.freetls.fastly.net/i/u/300x300/24546ab04aeb584825f465d8968301c4.png"
+  "https://lastfm.freetls.fastly.net/i/u/300x300/24546ab04aeb584825f465d8968301c4.png",
 ];
-
-
-
 
 /**
  * Display images from the imageUrl array
@@ -288,21 +285,21 @@ function displayImages(limit = 100) {
     const limitedImageUrls = imageUrl.slice(0, actualLimit);
 
     // Select the container where images will be appended
-    const backgroundContainer = document.querySelector('.background-images');
+    const backgroundContainer = document.querySelector(".background-images");
 
-    backgroundContainer.innerHTML = '';
+    backgroundContainer.innerHTML = "";
 
     // Iterate over the limitedImageUrls array and create image elements
     limitedImageUrls.forEach((url, index) => {
       // Create a div to wrap the img (optional, for styling purposes)
-      const div = document.createElement('div');
-      div.classList.add('image-wrapper'); 
+      const div = document.createElement("div");
+      div.classList.add("image-wrapper");
 
       // Create the img element
-      const img = document.createElement('img');
+      const img = document.createElement("img");
       img.src = url;
       img.alt = `Image ${index + 1} from Last.fm`;
-      img.loading = 'lazy';
+      img.loading = "lazy";
 
       // Append the img to the div
       div.appendChild(img);
@@ -313,23 +310,25 @@ function displayImages(limit = 100) {
 
     // Duplicate the images for seamless scrolling
     limitedImageUrls.forEach((url, index) => {
-      const div = document.createElement('div');
-      div.classList.add('image-wrapper');
+      const div = document.createElement("div");
+      div.classList.add("image-wrapper");
 
-      const img = document.createElement('img');
+      const img = document.createElement("img");
       img.src = url;
       img.alt = `Image Duplicate ${index + 1} from Last.fm`;
-      img.loading = 'lazy';
+      img.loading = "lazy";
 
       div.appendChild(img);
       backgroundContainer.appendChild(div);
     });
 
-    console.log(`${actualLimit * 2} images have been displayed (including duplicates).`);
+    console.log(
+      `${actualLimit * 2} images have been displayed (including duplicates).`
+    );
   } catch (error) {
-    console.error('Error displaying images:', error);
+    console.error("Error displaying images:", error);
   }
 }
 
 // Initialize and call the function to display images
-displayImages(200); 
+displayImages(200);
