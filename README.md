@@ -16,7 +16,7 @@ This is the best way to use BeatBuddy! It can be accessed anytime  [Here](https:
 
 
 ## Using the application on localhost:
-
+using the application on localhost is also possible, however it requires your to download and setup the mysql server on your computer, as well as creating and setting the proper API keys.
 
 
 
